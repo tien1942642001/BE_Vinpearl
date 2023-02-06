@@ -17,6 +17,8 @@ public interface RoomTypeService {
 
     ImageRoomType save(RoomType room, MultipartFile[] images) throws IOException;
 
+    RoomType save(RoomType room);
+
     void deleteRoomType(Long id);
 
     Page<RoomType> searchRoomTypesPage(Long area, String name, Pageable pageable);

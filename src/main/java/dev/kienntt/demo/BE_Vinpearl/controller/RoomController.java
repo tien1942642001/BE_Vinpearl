@@ -33,10 +33,17 @@ public class RoomController {
         return new ResponseMessage(200, "Success", "", null);
     }
 
+//    @PostMapping("/roomType/create")
+//    public ResponseMessage createNewRoomType(@RequestBody RoomType roomType) {
+//        roomType.setCreatedDate(localDateTime.toString());
+//        roomTypeService.save(roomType);
+//        return new ResponseMessage(200, "Success", "", null);
+//    }
+
     @PostMapping("/roomType/create")
     public ResponseMessage createNewRoomType(@RequestBody RoomType roomType) {
         roomType.setCreatedDate(localDateTime.toString());
-//        roomTypeService.save(roomType);
+        roomTypeService.save(roomType);
         return new ResponseMessage(200, "Success", "", null);
     }
 

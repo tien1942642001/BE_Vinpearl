@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
@@ -32,8 +33,9 @@ public class Room extends BaseEntity {
             cascade = CascadeType.ALL)
     private List<BookingRoom> bookingRooms;
 
-//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-//    @JoinColumn(name = "roomTypeId", nullable = false, insertable = false, updatable = false)
-//    private RoomType roomType;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "roomTypeId", nullable = false, insertable = false, updatable = false)
+    @JsonIgnoreProperties("roomType")
+    private RoomType roomType;
 
 }

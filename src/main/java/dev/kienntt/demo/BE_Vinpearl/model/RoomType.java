@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 
 import javax.persistence.*;
@@ -24,8 +25,9 @@ public class RoomType extends BaseEntity{
 
     private Long hotelId;
 
-    @OneToMany(mappedBy = "roomTypeId", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "roomType", fetch = FetchType.EAGER)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
+    @JsonIgnoreProperties("roomType")
     private Set<Room> rooms;
 }
