@@ -1,10 +1,7 @@
 package dev.kienntt.demo.BE_Vinpearl.config;
 
-import dev.kienntt.demo.BE_Vinpearl.model.ResponseMessage;
 import dev.kienntt.demo.BE_Vinpearl.model.User;
 import io.jsonwebtoken.*;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 
 import java.nio.file.AccessDeniedException;
 import java.security.*;

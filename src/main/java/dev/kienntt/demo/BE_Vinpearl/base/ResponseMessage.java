@@ -1,4 +1,4 @@
-package dev.kienntt.demo.BE_Vinpearl.model;
+package dev.kienntt.demo.BE_Vinpearl.base;
 
 public class ResponseMessage {
     private int code;
@@ -11,10 +11,6 @@ public class ResponseMessage {
 
     private Long totalItems;
 
-    private Integer pageIndex;
-
-    private Integer size;
-
     public ResponseMessage() {
 
     }
@@ -24,15 +20,6 @@ public class ResponseMessage {
         this.message = message;
         this.data = data;
         this.detailError = detailError;
-    }
-
-    public ResponseMessage(int code, String message, Object data, Long totalItems, Integer pageIndex, Integer size) {
-        this.code = code;
-        this.message = message;
-        this.data = data;
-        this.totalItems = totalItems;
-        this.pageIndex = pageIndex;
-        this.size = size;
     }
 
     public int getCode() {
@@ -66,28 +53,5 @@ public class ResponseMessage {
     public void setDetailError(String detailError) {
         this.detailError = detailError;
     }
-
-    public Long getTotalItems() {
-        return totalItems;
-    }
-
-    public void setTotalItems(Long totalItems) {
-        this.totalItems = totalItems;
-    }
-
-    public Integer getPageIndex() {
-        return pageIndex;
-    }
-
-    public void setPageIndex(Integer pageIndex) {
-        this.pageIndex = pageIndex;
-    }
-
-    public Integer getSize() {
-        return size;
-    }
-
-    public void setSize(Integer size) {
-        this.size = size;
-    }
 }
+

@@ -2,6 +2,7 @@ package dev.kienntt.demo.BE_Vinpearl.service.serviceImpl;
 
 import dev.kienntt.demo.BE_Vinpearl.model.BookingRoom;
 import dev.kienntt.demo.BE_Vinpearl.model.Room;
+import dev.kienntt.demo.BE_Vinpearl.model.RoomType;
 import dev.kienntt.demo.BE_Vinpearl.repository.RoomRepository;
 import dev.kienntt.demo.BE_Vinpearl.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;

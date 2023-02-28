@@ -23,6 +23,7 @@ import java.util.Optional;
 @Service
 public class HotelServiceImpl implements HotelService {
     private static final Path CURRENT_FOLDER = Paths.get(System.getProperty("user.dir"));
+    private static final String domain = "http://localhost:8080/";
     @Autowired
     private HotelRepository hotelRepository;
 
@@ -59,22 +60,10 @@ public class HotelServiceImpl implements HotelService {
             ImageHotel imageHotel = new ImageHotel();
             imageHotel.setHotelId(hotel1.getId());
             imageHotel.setName(imagePath.resolve(image.getOriginalFilename()).toString());
+            imageHotel.setPath(domain + imagePath.resolve(image.getOriginalFilename()));
             imageHotelRepository.save(imageHotel);
         }
         return null;
-    }
-
-    public void saveImage(MultipartFile image) throws IOException {
-        Path staticPath = Paths.get("static");
-        Path imagePath = Paths.get("images");
-        if (!Files.exists(CURRENT_FOLDER.resolve(staticPath).resolve(imagePath))) {
-            Files.createDirectories(CURRENT_FOLDER.resolve(staticPath).resolve(imagePath));
-        }
-        Path files = CURRENT_FOLDER.resolve(staticPath)
-                .resolve(imagePath).resolve(image.getOriginalFilename());
-        try (OutputStream os = Files.newOutputStream(files)) {
-            os.write(image.getBytes());
-        }
     }
 
     @Override
@@ -83,7 +72,7 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
-    public Page<Hotel> searchHotel(Long area, String name, String phone, Pageable pageable) {
-        return hotelRepository.searchHotel(area, name, phone, pageable);
+    public Page<Hotel> searchHotel(Long siteId, String name, Long totalRoom, String phone, Pageable pageable) {
+        return hotelRepository.searchHotel(siteId, name, totalRoom, phone, pageable);
     }
 }

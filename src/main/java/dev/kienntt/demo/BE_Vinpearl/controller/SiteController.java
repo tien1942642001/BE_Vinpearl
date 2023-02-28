@@ -1,11 +1,9 @@
 package dev.kienntt.demo.BE_Vinpearl.controller;
 
-import dev.kienntt.demo.BE_Vinpearl.model.ResponseMessage;
+import dev.kienntt.demo.BE_Vinpearl.base.ResponseMessage;
 import dev.kienntt.demo.BE_Vinpearl.model.Site;
 import dev.kienntt.demo.BE_Vinpearl.service.SiteService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;

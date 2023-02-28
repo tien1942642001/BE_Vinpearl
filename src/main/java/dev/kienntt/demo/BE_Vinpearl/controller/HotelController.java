@@ -1,26 +1,18 @@
 package dev.kienntt.demo.BE_Vinpearl.controller;
 
 import dev.kienntt.demo.BE_Vinpearl.model.Hotel;
-import dev.kienntt.demo.BE_Vinpearl.model.ResponseMessage;
-import dev.kienntt.demo.BE_Vinpearl.model.Room;
+import dev.kienntt.demo.BE_Vinpearl.base.ResponseMessage;
 import dev.kienntt.demo.BE_Vinpearl.service.HotelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -34,10 +26,9 @@ public class HotelController {
     LocalDateTime localDateTime = LocalDateTime.now();
 
 //    @PostMapping("/create")
-//    public ResponseMessage createNewHotel(@RequestBody Hotel hotel) {
-//        System.out.println("local:" +localDateTime);
+//    public ResponseMessage createNewHotel(@ModelAttribute Hotel hotel, MultipartFile[] images) throws IOException {
 //        hotel.setCreatedDate(localDateTime.toString());
-//        hotelService.save(hotel);
+//        hotelService.save(hotel, images);
 //        return new ResponseMessage(200, "Success", "", null);
 //    }
 
@@ -47,15 +38,20 @@ public class HotelController {
                                        @RequestParam String description,
                                        @RequestParam String address,
                                        @RequestParam Long area,
+                                       @RequestParam String phone,
+                                       @RequestParam Long totalRoom,
+                                       @RequestParam Long siteId,
                                             @RequestParam MultipartFile[] images) throws IOException {
         Hotel hotel = new Hotel();
-        System.out.println("local:" +localDateTime);
         hotel.setCreatedDate(localDateTime.toString());
         hotel.setName(name);
         hotel.setEmail(email);
         hotel.setDescription(description);
         hotel.setAddress(address);
+        hotel.setPhone(phone);
         hotel.setArea(area);
+        hotel.setSiteId(siteId);
+        hotel.setTotalRoom(totalRoom);
         hotelService.save(hotel, images);
         return new ResponseMessage(200, "Success", "", null);
     }
@@ -69,7 +65,6 @@ public class HotelController {
                                        @RequestParam Long area,
                                        @RequestParam MultipartFile[] images) throws IOException {
         Optional<Hotel> hotel = hotelService.findById(Long.parseLong(id));
-        System.out.println("local:" +localDateTime);
         hotel.get().setCreatedDate(localDateTime.toString());
         hotel.get().setName(name);
         hotel.get().setEmail(email);
@@ -89,11 +84,12 @@ public class HotelController {
     }
 
     @GetMapping("/search")
-    public ResponseMessage searchHotelsPage(@RequestParam(required = false) Long area,
+    public ResponseMessage searchHotelsPage(@RequestParam(required = false) Long siteId,
+                                            @RequestParam(required = false) Long totalRoom,
                                             @RequestParam(required = false) String name,
                                             @RequestParam(required = false) String phone,
                                             Pageable pageable) {
-        Page<Hotel> listRoom = hotelService.searchHotel(area, name, phone, pageable);
-        return new ResponseMessage(200, "Success", listRoom, null);
+        Page<Hotel> listHotel = hotelService.searchHotel(siteId, name, totalRoom, phone, pageable);
+        return new ResponseMessage(200, "Success", listHotel, null);
     }
 }

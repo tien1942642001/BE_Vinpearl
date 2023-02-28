@@ -19,5 +19,5 @@ public interface HotelService {
 
     void remove(Long id);
 
-    Page<Hotel> searchHotel(Long area, String name, String phone, Pageable pageable);
+    Page<Hotel> searchHotel(Long siteId, String name, Long totalRoom, String phone, Pageable pageable);
 }

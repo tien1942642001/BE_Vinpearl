@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.model;
 
+import dev.kienntt.demo.BE_Vinpearl.base.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +11,6 @@ import javax.persistence.Table;
 @Table(name = "role")
 @Getter
 @Setter
-public class Role extends BaseEntity{
+public class Role extends BaseEntity {
     private String name;
 }

@@ -1,6 +1,7 @@
 package dev.kienntt.demo.BE_Vinpearl.service;
 
 import dev.kienntt.demo.BE_Vinpearl.model.Room;
+import dev.kienntt.demo.BE_Vinpearl.model.RoomType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -19,5 +20,4 @@ public interface RoomService {
     Iterable<Room> searchRoom(Long roomType);
 
     Page<Room> searchRoomPage(Long hotelId, Long roomType, Long bookingStart, Long bookingEnd, Pageable pageable);
-
 }
