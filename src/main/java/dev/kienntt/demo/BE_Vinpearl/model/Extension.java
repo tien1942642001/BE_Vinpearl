@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.model;
 
+import dev.kienntt.demo.BE_Vinpearl.base.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;
 

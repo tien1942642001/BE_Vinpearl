@@ -1,14 +1,12 @@
 package dev.kienntt.demo.BE_Vinpearl.controller;
 
-import dev.kienntt.demo.BE_Vinpearl.model.Hotel;
-import dev.kienntt.demo.BE_Vinpearl.model.ResponseMessage;
+import dev.kienntt.demo.BE_Vinpearl.base.ResponseMessage;
 import dev.kienntt.demo.BE_Vinpearl.model.Restaurant;
 import dev.kienntt.demo.BE_Vinpearl.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 
 @RestController

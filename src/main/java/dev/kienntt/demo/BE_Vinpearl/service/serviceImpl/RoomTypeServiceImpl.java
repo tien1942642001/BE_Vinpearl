@@ -15,13 +15,14 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class RoomTypeServiceImpl implements RoomTypeService {
     private static final Path CURRENT_FOLDER = Paths.get(System.getProperty("user.dir"));
+    private static final String domain = "http://localhost:8080/";
+
     @Autowired
     private RoomTypeRepository roomTypeRepository;
 
@@ -57,6 +58,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
             ImageRoomType imageRoomType = new ImageRoomType();
             imageRoomType.setRoomTypeId(roomType1.getId());
             imageRoomType.setName(imagePath.resolve(image.getOriginalFilename()).toString());
+            imageRoomType.setPath(domain + imagePath.resolve(image.getOriginalFilename()));
             imageRoomTypeRepository.save(imageRoomType);
         }
         return null;
@@ -76,7 +78,7 @@ public class RoomTypeServiceImpl implements RoomTypeService {
         }
     }
     @Override
-    public Page<RoomType> searchRoomTypesPage(Long area, String name, Pageable pageable) {
+    public Page<RoomType> searchRoomTypesPage(Long hotelId, Long area, String name, Pageable pageable) {
 //        return roomTypeRepository.searchRoomTypesPage(area, name, pageable);
         return roomTypeRepository.searchRoomTypesPage(area, name, pageable);
     }

@@ -1,22 +1,21 @@
 package dev.kienntt.demo.BE_Vinpearl.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.EqualsAndHashCode;
+import dev.kienntt.demo.BE_Vinpearl.base.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Setter
+@Table(name = "booking_room")
 public class BookingRoom extends BaseEntity {
-    private Long startTime;
+    private LocalDateTime checkIn;
 
-    private Long endTime;
+    private LocalDateTime checkOut;
 
     private Long paymentDate;
 
@@ -32,15 +31,21 @@ public class BookingRoom extends BaseEntity {
 
     private Long perNight;
 
-    private Long userId;
+    private Long customerId;
 
     private Long roomId;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "userId", referencedColumnName = "id", insertable = false, updatable = false)
-    private User user;
+    private Long serviceId;
 
-//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-//    @JoinColumn(name = "roomId", nullable = false, insertable = false, updatable = false)
-//    private Room room;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "customerId", referencedColumnName = "id", insertable = false, updatable = false)
+    private Customer customer;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "roomId", nullable = false, insertable = false, updatable = false)
+    private Room room;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "serviceId", referencedColumnName = "id", insertable = false, updatable = false)
+    private Service service;
 }

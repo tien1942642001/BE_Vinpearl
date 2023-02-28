@@ -22,4 +22,8 @@ public interface RoomRepository extends PagingAndSortingRepository<Room, Long> {
 //            "(:hotelId is null or r.roomType.hotelId = :hotelId) and " +
             "(:roomType is null or r.roomTypeId = :roomType)")
     Page<Room> searchRoomsPage(Long roomType, Pageable pageable);
+
+    @Query("SELECT r FROM Room r WHERE " +
+            "r.status = :status AND r.roomTypeId = :roomTypeId")
+    List<Room> findByRoomTypeId(Long roomTypeId, Integer status);
 }

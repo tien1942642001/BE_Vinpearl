@@ -1,6 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.exception;
 
-import dev.kienntt.demo.BE_Vinpearl.model.ResponseMessage;
+import dev.kienntt.demo.BE_Vinpearl.base.ResponseMessage;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;

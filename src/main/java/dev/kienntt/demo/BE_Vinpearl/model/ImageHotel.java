@@ -1,6 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import dev.kienntt.demo.BE_Vinpearl.base.BaseEntity;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +17,10 @@ import javax.persistence.Table;
 @Setter
 public class ImageHotel extends BaseEntity {
     private Long hotelId;
+
     private String name;
+
+    private String path;
 
     @ManyToOne
     @JoinColumn(name = "hotelId", referencedColumnName = "id", insertable = false, updatable = false)

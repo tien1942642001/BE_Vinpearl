@@ -1,14 +1,15 @@
 package dev.kienntt.demo.BE_Vinpearl.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.config.annotation.*;
 
+import java.time.Duration;
+
 @Component
 @Configuration
-@EnableWebMvc
+//@EnableWebMvc
 public class WebConfig extends WebMvcConfigurerAdapter implements WebMvcConfigurer {
 
     @Autowired
@@ -26,5 +27,11 @@ public class WebConfig extends WebMvcConfigurerAdapter implements WebMvcConfigur
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**");
+//                .allowedOrigins("http://localhost:4200") // Địa chỉ của Angular app
+//                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+//                .allowedHeaders("*")
+//                .allowCredentials(true)
+//                .maxAge(;
     }
+
 }

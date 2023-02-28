@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
     public User updateUser(User user) {
         User existingUser = userRepository.findById(user.getId()).get();
         existingUser.setFullName(user.getFullName());
-        existingUser.setUsername(user.getUsername());
+        existingUser.setEmail(user.getEmail());
         User updatedUser = userRepository.save(existingUser);
         return updatedUser;
     }
@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 }

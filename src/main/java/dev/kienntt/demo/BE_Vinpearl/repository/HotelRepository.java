@@ -15,8 +15,9 @@ import java.util.List;
 public interface HotelRepository extends PagingAndSortingRepository<Hotel, Long> {
 
     @Query("SELECT h FROM Hotel h WHERE " +
-            "(:area is null or h.area = :area) and " +
+            "(:siteId is null or h.siteId = :siteId) and " +
+            "(:name is null or h.name = :name) and " +
             "(:phone is null or h.phone = :phone) and " +
-            "(:name is null or h.name = :name)")
-    Page<Hotel> searchHotel(Long area, String name, String phone, Pageable pageable);
+            "(:totalRoom is null or h.totalRoom = :totalRoom)")
+    Page<Hotel> searchHotel(Long siteId, String name, Long totalRoom, String phone, Pageable pageable);
 }

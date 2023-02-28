@@ -1,6 +1,7 @@
 package dev.kienntt.demo.BE_Vinpearl.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import dev.kienntt.demo.BE_Vinpearl.base.BaseEntity;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,7 +14,7 @@ import java.util.Set;
 @Table(name = "hotel")
 @Getter
 @Setter
-public class Hotel extends BaseEntity{
+public class Hotel extends BaseEntity {
     private String name;
 
     private Long area;
@@ -32,15 +33,15 @@ public class Hotel extends BaseEntity{
 
     private Long siteId;
 
-    @OneToMany(mappedBy = "hotelId", fetch = FetchType.EAGER)
-    @EqualsAndHashCode.Exclude
-    @ToString.Exclude
-    private Set<RoomType> roomTypess;
+//    @OneToMany(mappedBy = "hotelId", fetch = FetchType.EAGER)
+//    @EqualsAndHashCode.Exclude
+//    @ToString.Exclude
+//    private Set<RoomType> roomTypes;
 
-    @OneToMany(mappedBy = "hotelId", fetch = FetchType.EAGER)
-    @EqualsAndHashCode.Exclude
-    @ToString.Exclude
-    private Set<Restaurant> restaurant;
+//    @OneToMany(mappedBy = "hotelId", fetch = FetchType.EAGER)
+//    @EqualsAndHashCode.Exclude
+//    @ToString.Exclude
+//    private Set<Restaurant> restaurant;
 
     @OneToMany(mappedBy = "hotelId", fetch = FetchType.EAGER)
     @EqualsAndHashCode.Exclude

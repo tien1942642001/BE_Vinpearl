@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.model;
 
+import dev.kienntt.demo.BE_Vinpearl.base.BaseEntity;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,9 +20,11 @@ public class ImageRoomType extends BaseEntity {
 
     private String name;
 
+    private String path;
+
     @ManyToOne
-    @JoinColumn(name = "roomId", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "roomTypeId", referencedColumnName = "id", insertable = false, updatable = false)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    private Room room;
+    private RoomType roomType;
 }

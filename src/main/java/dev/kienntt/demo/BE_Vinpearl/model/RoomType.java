@@ -1,6 +1,7 @@
 package dev.kienntt.demo.BE_Vinpearl.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import dev.kienntt.demo.BE_Vinpearl.base.BaseEntity;
 import lombok.*;
 
 import javax.persistence.*;
@@ -10,7 +11,7 @@ import java.util.Set;
 @Table(name = "room_type")
 @Getter
 @Setter
-public class RoomType extends BaseEntity{
+public class RoomType extends BaseEntity {
     private String name;
 
     private Long area;
@@ -19,15 +20,34 @@ public class RoomType extends BaseEntity{
 
     private Long numberChildren;
 
-    private String description;
+//    private Long priceVnd;
+//
+//    private Long priceUsd;
 
-    private Long price;
+    private String description_vn;
+
+    private String description_en;
 
     private Long hotelId;
+
+    private Long numberOfRooms;
+
+    @OneToMany(mappedBy = "roomTypeId", fetch = FetchType.EAGER)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @JsonIgnoreProperties("roomType")
+    private Set<ImageRoomType> images;
+
+//    @OneToMany(mappedBy = "roomTypes", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "roomTypes", fetch = FetchType.EAGER)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @JsonIgnoreProperties("roomTypes")
+    private Set<Room> rooms;
 
     @OneToMany(mappedBy = "roomType", fetch = FetchType.EAGER)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @JsonIgnoreProperties("roomType")
-    private Set<Room> rooms;
+    private Set<Service> service;
 }
