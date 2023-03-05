@@ -57,7 +57,7 @@ public class BookingTicketServiceImpl implements BookingTicketService {
         }
 
         // calculate the total price of the tickets
-        double totalPrice = ticketType.get().getPriceVnd() * numOfPassengers;
+        double totalPrice = ticketType.get().getPrice() * numOfPassengers;
 
         // create ticket objects for each passenger and save to database
 //        List<Ticket> tickets = new ArrayList<>();

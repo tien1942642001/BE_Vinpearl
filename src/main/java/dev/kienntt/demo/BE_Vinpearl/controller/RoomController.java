@@ -47,8 +47,7 @@ public class RoomController {
                                        @RequestParam Long area,
                                        @RequestParam Long numberParent,
                                        @RequestParam Long numberChildren,
-                                       @RequestParam String description_vn,
-                                       @RequestParam String description_en,
+                                       @RequestParam String description,
                                        @RequestParam Long hotelId,
                                        @RequestParam Long numberOfRooms,
                                        @RequestParam MultipartFile[] images) throws IOException {
@@ -58,8 +57,7 @@ public class RoomController {
         roomType.setArea(area);
         roomType.setNumberParent(numberParent);
         roomType.setNumberChildren(numberChildren);
-        roomType.setDescription_vn(description_vn);
-        roomType.setDescription_en(description_en);
+        roomType.setDescription(description);
         roomType.setHotelId(hotelId);
         roomType.setNumberOfRooms(numberOfRooms);
         roomTypeService.save(roomType, images);

@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dev.kienntt.demo.BE_Vinpearl.base.BaseEntity;
 import lombok.EqualsAndHashCode;
@@ -8,6 +9,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -52,4 +54,8 @@ public class Hotel extends BaseEntity {
     @ManyToOne
     @JoinColumn(name="siteId", nullable=false, insertable = false, updatable = false)
     private Site site;
+
+    @ManyToMany(mappedBy = "hotels")
+    @JsonIgnore
+    private Set<Tour> tours = new HashSet<>();
 }

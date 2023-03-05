@@ -21,8 +21,10 @@ public class AuthController {
 
     private final JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
 
-    @PostMapping("/create")
+    @PostMapping("/register")
     public ResponseMessage create(@RequestBody User user) {
+        String md5Password = DigestUtils.md5Hex(user.getPassword()).toUpperCase();
+        user.setPassword(md5Password);
         userService.save(user);
         return new ResponseMessage(200, "Tạo tài khoản thành công", null, null);
     }

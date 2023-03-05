@@ -1,11 +1,15 @@
 package dev.kienntt.demo.BE_Vinpearl.controller;
 
+import dev.kienntt.demo.BE_Vinpearl.config.JwtTokenProvider;
 import dev.kienntt.demo.BE_Vinpearl.model.Customer;
 import dev.kienntt.demo.BE_Vinpearl.base.ResponseMessage;
 import dev.kienntt.demo.BE_Vinpearl.service.CustomerService;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Optional;
 
 @RestController
@@ -15,10 +19,26 @@ public class CustomerController {
     @Autowired
     private CustomerService customerService;
 
-    @PostMapping("/create")
+    @PostMapping("/register")
     public ResponseMessage create(@RequestBody Customer customer) {
+        String md5Password = DigestUtils.md5Hex(customer.getPassword()).toUpperCase();
+        customer.setPassword(md5Password);
         customerService.save(customer);
         return new ResponseMessage(200, "Tạo tài khoản thành công", "", null);
+    }
+
+    @PostMapping("/login")
+    public ResponseMessage login(@RequestBody Customer customer) throws InvalidKeySpecException, NoSuchAlgorithmException {
+        Customer customerDb = customerService.findByEmail(customer.getEmail());
+        String md5Password = DigestUtils.md5Hex(customer.getPassword()).toUpperCase();
+        if (!customerDb.getEmail().equals(customer.getEmail())) {
+            return new ResponseMessage(400, "Fail","Tài khoản không tồn tại", null);
+        } else if (!customerDb.getPassword().equals(md5Password)) {
+            return new ResponseMessage(400, "Fail", "Mật khẩu không đúng", null);
+        }
+        JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
+        customerDb.setToken(jwtTokenProvider.createJwtSignedHMAC1(customerDb));
+        return new ResponseMessage(200, "Success", customerDb, null);
     }
 
     @GetMapping("/findAll")

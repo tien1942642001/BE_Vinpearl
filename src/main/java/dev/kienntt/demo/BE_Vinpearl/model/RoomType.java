@@ -20,13 +20,10 @@ public class RoomType extends BaseEntity {
 
     private Long numberChildren;
 
-//    private Long priceVnd;
+//    private Long price;
 //
-//    private Long priceUsd;
 
-    private String description_vn;
-
-    private String description_en;
+    private String description;
 
     private Long hotelId;
 

@@ -17,10 +17,8 @@ import java.util.Set;
 public class Service extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
-    @Column(name = "price_vnd", nullable = false)
-    private Long priceVnd;
-    @Column(name = "price_usd", nullable = false)
-    private Long priceUsd;
+    @Column(name = "price", nullable = false)
+    private Long price;
     @Column(name = "room_type_id")
     private Long roomTypeId;
 

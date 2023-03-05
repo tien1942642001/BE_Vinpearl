@@ -1,6 +1,7 @@
 package dev.kienntt.demo.BE_Vinpearl.service.serviceImpl;
 
 import dev.kienntt.demo.BE_Vinpearl.model.Customer;
+import dev.kienntt.demo.BE_Vinpearl.model.User;
 import dev.kienntt.demo.BE_Vinpearl.repository.CustomerRepository;
 import dev.kienntt.demo.BE_Vinpearl.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,5 +33,10 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public void remove(Long id) {
         customerRepository.deleteById(id);
+    }
+
+    @Override
+    public Customer findByEmail(String email) {
+        return customerRepository.findByEmail(email);
     }
 }

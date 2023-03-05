@@ -9,6 +9,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,7 +32,12 @@ public class TourServiceImpl implements TourService {
 
     @Override
     public Tour save(Tour tour) {
-        return tourRepository.save(tour);
+        LocalDateTime getExpirationDate =
+                Instant.ofEpochMilli(tour.getExpirationDateMls()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        tour.setExpirationDate(getExpirationDate);
+        Tour tour1 = tourRepository.save(tour);
+        tour1.setCode(String.format("GN%06d", tour1.getId()));
+        return tourRepository.save(tour1);
     }
 
     @Override

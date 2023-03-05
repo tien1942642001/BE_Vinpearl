@@ -15,8 +15,6 @@ public class TicketType extends BaseEntity {
 
     private Long totalSeat;
 
-    private Long priceVnd;
-
-    private Long priceUsd;
+    private Long price;
 
 }
