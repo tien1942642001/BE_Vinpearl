@@ -17,10 +17,8 @@ public class Content {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @Column(name = "name_vn")
-    private String nameVn;
-    @Column(name = "name_en")
-    private String nameEn;
+    @Column(name = "name")
+    private String name;
     @ManyToMany(mappedBy = "contents")
     @JsonIgnore
     private Set<Service> services = new HashSet<>();

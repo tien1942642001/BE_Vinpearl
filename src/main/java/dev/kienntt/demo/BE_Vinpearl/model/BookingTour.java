@@ -12,11 +12,8 @@ import java.time.LocalDateTime;
 @Setter
 @Table(name = "booking_tour")
 public class BookingTour extends BaseEntity {
-    private LocalDateTime checkIn;
 
-    private LocalDateTime checkOut;
-
-    private Long paymentDate;
+    private LocalDateTime paymentDate;
 
     private Long paymentAmount;
 
@@ -27,8 +24,6 @@ public class BookingTour extends BaseEntity {
     private Long numberChildren;
 
     private String description;
-
-    private Long perNight;
 
     private Long customerId;
 
@@ -45,8 +40,4 @@ public class BookingTour extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "roomId", nullable = false, insertable = false, updatable = false)
     private Room room;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "serviceId", referencedColumnName = "id", insertable = false, updatable = false)
-    private Service service;
 }

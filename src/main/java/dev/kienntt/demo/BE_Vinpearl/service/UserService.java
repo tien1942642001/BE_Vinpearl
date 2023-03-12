@@ -1,6 +1,9 @@
 package dev.kienntt.demo.BE_Vinpearl.service;
 
+import dev.kienntt.demo.BE_Vinpearl.model.Hotel;
 import dev.kienntt.demo.BE_Vinpearl.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
@@ -17,4 +20,6 @@ public interface UserService {
     void deleteUser(Long id);
 
     User findByEmail(String email);
+
+    Page<User> searchUser(Long hotelId, String name, String phone, Pageable pageable);
 }

@@ -5,7 +5,7 @@ import dev.kienntt.demo.BE_Vinpearl.model.Airport;
 import dev.kienntt.demo.BE_Vinpearl.service.AirportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RestController
@@ -15,8 +15,12 @@ public class AirportController {
     @Autowired
     private AirportService airportService;
 
+    LocalDateTime localDateTime = LocalDateTime.now();
+
     @PostMapping("/create")
     public ResponseMessage create(@RequestBody Airport airport) {
+        airport.setCreatedDate(localDateTime.toString());
+        airport.setCreatedBy(airport.getCreator());
         airportService.save(airport);
         return new ResponseMessage(200, "Tạo sân bay thành công", "", null);
     }
@@ -38,6 +42,8 @@ public class AirportController {
         Optional<Airport> airportOptional = airportService.findById(id);
         return airportOptional.map(site1 -> {
             airport.setId(site1.getId());
+            airport.setCreatedDate(localDateTime.toString());
+            airport.setCreatedBy(airport.getCreator());
             airportService.save(airport);
             return new ResponseMessage(200, "Success", "", null);
         })

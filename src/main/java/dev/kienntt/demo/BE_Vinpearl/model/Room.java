@@ -13,16 +13,22 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class Room extends BaseEntity {
+    @Column(name = "name")
     private String name;
 
-    private Long numberRoom;
+    @Column(name = "number_room")
+    private String numberRoom;
 
+    @Column(name = "gala")
     private Long gala;
 
+    @Column(name = "cocktail")
     private Long cocktail;
 
+    @Column(name = "room_group_type")
     private Long roomGroupType;
 
+    @Column(name = "room_type_id")
     private Long roomTypeId;
 
 //    @OneToMany(mappedBy = "roomId", fetch = FetchType.EAGER,
@@ -31,9 +37,10 @@ public class Room extends BaseEntity {
 //    private List<BookingRoom> bookingRooms;
 
     @ManyToOne()
-    @JoinColumn(name = "roomTypeId", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "room_type_id", nullable = false, insertable = false, updatable = false)
     @JsonIgnoreProperties("roomTypes")
     private RoomType roomTypes;
 
+    @Column(name = "status")
     private Integer status;
 }

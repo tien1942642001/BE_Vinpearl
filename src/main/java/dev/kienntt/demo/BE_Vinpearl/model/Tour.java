@@ -1,8 +1,11 @@
 package dev.kienntt.demo.BE_Vinpearl.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dev.kienntt.demo.BE_Vinpearl.base.BaseEntity;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -25,11 +28,8 @@ public class Tour extends BaseEntity {
 //    private LocalDateTime startTime;
 //
 //    private LocalDateTime endTime;
-    @Column(name = "description_vn")
-    private String descriptionVn;
-
-    @Column(name = "description_en")
-    private String descriptionEn;
+    @Column(name = "description")
+    private String description;
 
     @Column(name = "inclusion")
     private String inclusion;
@@ -46,11 +46,22 @@ public class Tour extends BaseEntity {
     @Column(name = "length_stay_id")
     private Long lengthStayId;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "leaving_from_id", referencedColumnName = "id", insertable = false, updatable = false, nullable=false)
+    private Site leavingFrom;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "leaving_to_id", referencedColumnName = "id", insertable = false, updatable = false, nullable=false)
+    private Site leavingTo;
+
     @Column(name = "suitable_id")
     private Long suitableId;
 
-    @Column(name = "price")
-    private Long price;
+    @Column(name = "status")
+    private Long status;
+
+    @Column(name = "type_of_tour_id")
+    private Long typeOfTourId;
 
     @Column(name = "expiration_date")
     private LocalDateTime expirationDate;
@@ -61,18 +72,27 @@ public class Tour extends BaseEntity {
     @Transient
     private Long expirationDateMls;
 
+    @Transient
+    private Long price;
+
 //    @OneToOne()
 //    @JoinColumn(name = "siteId", referencedColumnName = "id", insertable = false, updatable = false)
 //    private Site site;
 
-    @ManyToMany(fetch = FetchType.EAGER,
-            cascade = {
-                    CascadeType.PERSIST,
-                    CascadeType.MERGE
-            })
-    @JoinTable(
-            name = "tour_hotel",
-            joinColumns = @JoinColumn(name = "tour_id"),
-            inverseJoinColumns = @JoinColumn(name = "hotel_id"))
-    Set<Hotel> hotels;
+    @OneToMany(mappedBy = "tourId", fetch = FetchType.EAGER)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @JsonIgnoreProperties("hotel")
+    private Set<ImageTour> images;
+
+//    @ManyToMany(fetch = FetchType.EAGER,
+//            cascade = {
+//                    CascadeType.PERSIST,
+//                    CascadeType.MERGE
+//            })
+//    @JoinTable(
+//            name = "tour_hotel",
+//            joinColumns = @JoinColumn(name = "tour_id"),
+//            inverseJoinColumns = @JoinColumn(name = "hotel_id"))
+//    Set<Hotel> hotels;
 }

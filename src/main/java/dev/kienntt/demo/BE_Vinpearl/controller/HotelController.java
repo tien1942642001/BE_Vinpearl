@@ -16,10 +16,9 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RestController
-//@CrossOrigin("*")
+@CrossOrigin("*")
 @RequestMapping("/api/v1/hotel")
 public class HotelController {
-    private static final Path CURRENT_FOLDER = Paths.get(System.getProperty("user.dir"));
     @Autowired
     private HotelService hotelService;
 
@@ -37,19 +36,20 @@ public class HotelController {
                                        @RequestParam String email,
                                        @RequestParam String description,
                                        @RequestParam String address,
-                                       @RequestParam Long area,
+                                       @RequestParam Long acreage,
                                        @RequestParam String phone,
                                        @RequestParam Long totalRoom,
                                        @RequestParam Long siteId,
                                             @RequestParam MultipartFile[] images) throws IOException {
         Hotel hotel = new Hotel();
         hotel.setCreatedDate(localDateTime.toString());
+        hotel.setCreatedBy(hotel.getCreator());
         hotel.setName(name);
         hotel.setEmail(email);
         hotel.setDescription(description);
         hotel.setAddress(address);
         hotel.setPhone(phone);
-        hotel.setArea(area);
+        hotel.setAcreage(acreage);
         hotel.setSiteId(siteId);
         hotel.setTotalRoom(totalRoom);
         hotelService.save(hotel, images);
@@ -62,18 +62,24 @@ public class HotelController {
                                        @RequestParam String email,
                                        @RequestParam String description,
                                        @RequestParam String address,
-                                       @RequestParam Long area,
+                                       @RequestParam Long acreage,
                                        @RequestParam MultipartFile[] images) throws IOException {
         Optional<Hotel> hotel = hotelService.findById(Long.parseLong(id));
         hotel.get().setCreatedDate(localDateTime.toString());
+        hotel.get().setCreatedBy(hotel.get().getCreator());
         hotel.get().setName(name);
         hotel.get().setEmail(email);
         hotel.get().setDescription(description);
         hotel.get().setAddress(address);
-        hotel.get().setArea(area);
+        hotel.get().setAcreage(acreage);
         hotelService.save(hotel.get(), images);
         System.out.println(hotel.get());
         return new ResponseMessage(200, "Success", "", null);
+    }
+
+    @GetMapping("/findAll")
+    public ResponseMessage findAllRoomType() {
+        return new ResponseMessage(200, "Success", hotelService.findAll(), null);
     }
 
     @GetMapping("/detail/{id}")

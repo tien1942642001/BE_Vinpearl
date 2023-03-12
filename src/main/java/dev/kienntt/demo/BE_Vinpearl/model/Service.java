@@ -1,13 +1,13 @@
 package dev.kienntt.demo.BE_Vinpearl.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dev.kienntt.demo.BE_Vinpearl.base.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -17,10 +17,18 @@ import java.util.Set;
 public class Service extends BaseEntity {
     @Column(name = "name", nullable = false)
     private String name;
+
     @Column(name = "price", nullable = false)
     private Long price;
+
     @Column(name = "room_type_id")
     private Long roomTypeId;
+
+    @Transient
+    private List<Long> descriptionIds;
+
+    @Transient
+    private List<Long> contentIds;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "room_type_id", nullable = false, insertable = false, updatable = false)
@@ -33,9 +41,9 @@ public class Service extends BaseEntity {
                     CascadeType.MERGE
             })
     @JoinTable(
-    name = "service_description",
-    joinColumns = @JoinColumn(name = "service_id"),
-    inverseJoinColumns = @JoinColumn(name = "description_id"))
+            name = "service_description",
+            joinColumns = @JoinColumn(name = "service_id"),
+            inverseJoinColumns = @JoinColumn(name = "description_id"))
     Set<Description> descriptions;
 
     @ManyToMany(fetch = FetchType.EAGER,
@@ -44,8 +52,8 @@ public class Service extends BaseEntity {
                     CascadeType.MERGE
             })
     @JoinTable(
-    name = "service_content",
-    joinColumns = @JoinColumn(name = "service_id"),
-    inverseJoinColumns = @JoinColumn(name = "content_id"))
+            name = "service_content",
+            joinColumns = @JoinColumn(name = "service_id"),
+            inverseJoinColumns = @JoinColumn(name = "content_id"))
     Set<Content> contents = new HashSet<>();
 }

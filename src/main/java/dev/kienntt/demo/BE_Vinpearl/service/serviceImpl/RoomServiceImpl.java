@@ -31,6 +31,7 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public Room save(Room room) {
+        room.setNumberRoom(String.format("RM%3d", room.getId()));
         return roomRepository.save(room);
     }
 

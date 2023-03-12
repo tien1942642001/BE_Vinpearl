@@ -1,9 +1,11 @@
 package dev.kienntt.demo.BE_Vinpearl.controller;
 
 import dev.kienntt.demo.BE_Vinpearl.base.ResponseMessage;
-import dev.kienntt.demo.BE_Vinpearl.model.Service;
+import dev.kienntt.demo.BE_Vinpearl.model.*;
 import dev.kienntt.demo.BE_Vinpearl.service.ServiceService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -24,6 +26,12 @@ public class ServiceController {
     @GetMapping("/findAll")
     public ResponseMessage findAll() {
         return new ResponseMessage(200, "Success", serviceService.findAll(), null);
+    }
+
+    @GetMapping("/search")
+    public ResponseMessage search(@RequestParam(required = false) String name, Pageable pageable) {
+        Page<Service> listService = serviceService.search(name, pageable);
+        return new ResponseMessage(200, "Success", listService, null);
     }
 
     @GetMapping("/detail")
@@ -52,5 +60,33 @@ public class ServiceController {
             return new ResponseMessage(200, "Success", null, null);
         })
                 .orElseGet(() -> new ResponseMessage(404, "Error", null, "No result with query"));
+    }
+
+    @PostMapping("/description/create")
+    public ResponseMessage createDescription(@RequestBody Description description) {
+        serviceService.saveDescription(description);
+        return new ResponseMessage(200, "Success", "", null);
+    }
+
+    @GetMapping("/description/findAll")
+    public ResponseMessage findAllDescription() {
+        return new ResponseMessage(200, "Success", serviceService.findAllDescription(), null);
+    }
+
+    @PostMapping("/content/create")
+    public ResponseMessage createContent(@RequestBody Content content) {
+        serviceService.saveContent(content);
+        return new ResponseMessage(200, "Success", "", null);
+    }
+
+    @GetMapping("/content/findAll")
+    public ResponseMessage findAllContent() {
+        return new ResponseMessage(200, "Success", serviceService.findAllContent(), null);
+    }
+
+    @PostMapping("/save")
+    public ResponseMessage save(@RequestBody Service service) {
+        serviceService.saveServiceDescriptionContent(service);
+        return new ResponseMessage(200, "Success", "", null);
     }
 }

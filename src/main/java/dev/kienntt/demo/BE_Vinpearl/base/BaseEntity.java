@@ -49,6 +49,9 @@ public class BaseEntity {
     @Column(name = "updated_date")
     private String updatedDate;
 
+    @Transient
+    private String creator;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

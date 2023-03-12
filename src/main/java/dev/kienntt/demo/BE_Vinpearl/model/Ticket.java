@@ -14,9 +14,12 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class Ticket extends BaseEntity {
+    @Column(name = "name")
     private String name;
 
+    @Column(name = "status")
     private Long status;
 
+    @Column(name = "ticket_type_id")
     private Long ticketTypeId;
 }

@@ -33,4 +33,7 @@ public class Flight extends BaseEntity {
     @JoinColumn(name = "planeId", nullable = false, insertable = false, updatable = false)
     @JsonIgnoreProperties("plane")
     private Plane plane;
+
+    @Transient
+    private String creator;
 }

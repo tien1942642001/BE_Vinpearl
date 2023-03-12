@@ -9,7 +9,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -17,28 +17,38 @@ import java.util.Set;
 @Getter
 @Setter
 public class Hotel extends BaseEntity {
+    @Column(name = "name")
     private String name;
 
-    private Long area;
+    @Column(name = "acreage")
+    private Long acreage;
 
+    @Column(name = "email")
     private String email;
 
+    @Column(name = "description")
     private String description;
 
+    @Column(name = "address")
     private String address;
 
+    @Column(name = "total_room")
     private Long totalRoom;
 
+    @Column(name = "total_person")
     private Long totalPerson;
 
+    @Column(name = "phone")
     private String phone;
 
+    @Column(name = "site_id")
     private Long siteId;
 
-//    @OneToMany(mappedBy = "hotelId", fetch = FetchType.EAGER)
-//    @EqualsAndHashCode.Exclude
-//    @ToString.Exclude
-//    private Set<RoomType> roomTypes;
+    @OneToMany(mappedBy = "hotelId", fetch = FetchType.EAGER)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @JsonIgnore
+    private List<RoomType> roomTypes;
 
 //    @OneToMany(mappedBy = "hotelId", fetch = FetchType.EAGER)
 //    @EqualsAndHashCode.Exclude
@@ -52,10 +62,6 @@ public class Hotel extends BaseEntity {
     private Set<ImageHotel> images;
 
     @ManyToOne
-    @JoinColumn(name="siteId", nullable=false, insertable = false, updatable = false)
+    @JoinColumn(name="site_id", nullable=false, insertable = false, updatable = false)
     private Site site;
-
-    @ManyToMany(mappedBy = "hotels")
-    @JsonIgnore
-    private Set<Tour> tours = new HashSet<>();
 }

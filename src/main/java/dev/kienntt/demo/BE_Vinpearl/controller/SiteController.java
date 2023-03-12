@@ -6,6 +6,7 @@ import dev.kienntt.demo.BE_Vinpearl.service.SiteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RestController
@@ -15,8 +16,12 @@ public class SiteController {
     @Autowired
     private SiteService siteService;
 
+    LocalDateTime localDateTime = LocalDateTime.now();
+
     @PostMapping("/create")
     public ResponseMessage create(@RequestBody Site site) {
+        site.setCreatedDate(localDateTime.toString());
+        site.setCreatedBy(site.getCreator());
         siteService.save(site);
         return new ResponseMessage(200, "Tạo khu vực thành công", "", null);
     }
@@ -38,6 +43,8 @@ public class SiteController {
         Optional<Site> siteOptional = siteService.findById(id);
         return siteOptional.map(site1 -> {
             site.setId(site1.getId());
+            site.setUpdatedDate(localDateTime.toString());
+            site.setCreatedBy(site.getCreator());
             siteService.save(site);
             return new ResponseMessage(200, "Success", "", null);
         })
