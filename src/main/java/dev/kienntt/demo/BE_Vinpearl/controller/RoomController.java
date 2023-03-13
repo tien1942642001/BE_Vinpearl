@@ -31,6 +31,7 @@ public class RoomController {
     @PostMapping("/create")
     public ResponseMessage createNewRoom(@RequestBody Room room) {
         room.setCreatedDate(localDateTime.toString());
+        room.setCreatedBy(room.getCreator());
         roomService.save(room);
         return new ResponseMessage(200, "Success", "", null);
     }
@@ -44,22 +45,21 @@ public class RoomController {
 
     @PostMapping("/room-type/create")
     public ResponseMessage createNewRoomType(@RequestParam String name,
-                                       @RequestParam Long area,
+                                       @RequestParam Long acreage,
                                        @RequestParam Long numberParent,
                                        @RequestParam Long numberChildren,
-                                       @RequestParam String description_vn,
-                                       @RequestParam String description_en,
+                                       @RequestParam String description,
                                        @RequestParam Long hotelId,
                                        @RequestParam Long numberOfRooms,
                                        @RequestParam MultipartFile[] images) throws IOException {
         RoomType roomType = new RoomType();
         roomType.setCreatedDate(localDateTime.toString());
+        roomType.setCreatedBy(roomType.getCreator());
         roomType.setName(name);
-        roomType.setArea(area);
+        roomType.setAcreage(acreage);
         roomType.setNumberParent(numberParent);
         roomType.setNumberChildren(numberChildren);
-        roomType.setDescription_vn(description_vn);
-        roomType.setDescription_en(description_en);
+        roomType.setDescription(description);
         roomType.setHotelId(hotelId);
         roomType.setNumberOfRooms(numberOfRooms);
         roomTypeService.save(roomType, images);
@@ -69,6 +69,7 @@ public class RoomController {
     @PostMapping("/update")
     public ResponseMessage updateRoom(@RequestBody Room room) {
         room.setUpdatedDate(localDateTime.toString());
+        room.setCreatedBy(room.getCreator());
         roomService.save(room);
         return new ResponseMessage(200, "Success", "", null);
     }
@@ -139,12 +140,17 @@ public class RoomController {
 
     @GetMapping("/room-type/search")
     public ResponseMessage searchRoomTypesPage( @RequestParam(required = false) Long hotelId,
-                                             @RequestParam(required = false) Long area,
+                                             @RequestParam(required = false) Long acreage,
                                              @RequestParam(required = false) String name,
                                              Pageable pageable) {
 
-        Page<RoomType> listRoom = roomTypeService.searchRoomTypesPage(hotelId, area, name, pageable);
+        Page<RoomType> listRoom = roomTypeService.searchRoomTypesPage(hotelId, acreage, name, pageable);
         return new ResponseMessage(200, "Success", listRoom, null);
+    }
+
+    @GetMapping("/room-type/findAll")
+    public ResponseMessage findAllRoomType() {
+        return new ResponseMessage(200, "Success", roomTypeService.findAll(), null);
     }
 
 }

@@ -5,7 +5,7 @@ import dev.kienntt.demo.BE_Vinpearl.base.ResponseMessage;
 import dev.kienntt.demo.BE_Vinpearl.service.FlightService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RestController
@@ -15,8 +15,12 @@ public class FlightController {
     @Autowired
     private FlightService flightService;
 
+    LocalDateTime localDateTime = LocalDateTime.now();
+
     @PostMapping("/create")
     public ResponseMessage create(@RequestBody Flight flight) {
+        flight.setCreatedDate(localDateTime.toString());
+        flight.setCreatedBy(flight.getCreator());
         flightService.save(flight);
         return new ResponseMessage(200, "Tạo sân bay thành công", "", null);
     }
@@ -38,6 +42,8 @@ public class FlightController {
         Optional<Flight> flightOptional = flightService.findById(id);
         return flightOptional.map(site1 -> {
             flight.setId(site1.getId());
+            flight.setCreatedDate(localDateTime.toString());
+            flight.setCreatedBy(flight.getCreator());
             flightService.save(flight);
             return new ResponseMessage(200, "Success", "", null);
         })

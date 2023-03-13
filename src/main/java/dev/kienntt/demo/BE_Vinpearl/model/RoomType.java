@@ -12,24 +12,25 @@ import java.util.Set;
 @Getter
 @Setter
 public class RoomType extends BaseEntity {
+    @Column(name = "name")
     private String name;
 
-    private Long area;
+    @Column(name = "acreage")
+    private Long acreage;
 
+    @Column(name = "number_parent")
     private Long numberParent;
 
+    @Column(name = "number_children")
     private Long numberChildren;
 
-//    private Long priceVnd;
-//
-//    private Long priceUsd;
+    @Column(name = "description")
+    private String description;
 
-    private String description_vn;
-
-    private String description_en;
-
+    @Column(name = "hotel_id")
     private Long hotelId;
 
+    @Column(name = "number_of_rooms")
     private Long numberOfRooms;
 
     @OneToMany(mappedBy = "roomTypeId", fetch = FetchType.EAGER)
@@ -38,7 +39,7 @@ public class RoomType extends BaseEntity {
     @JsonIgnoreProperties("roomType")
     private Set<ImageRoomType> images;
 
-//    @OneToMany(mappedBy = "roomTypes", fetch = FetchType.EAGER)
+    //    @OneToMany(mappedBy = "roomTypes", fetch = FetchType.EAGER)
     @OneToMany(mappedBy = "roomTypes", fetch = FetchType.EAGER)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude

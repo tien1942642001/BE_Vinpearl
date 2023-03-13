@@ -26,14 +26,10 @@ import java.util.concurrent.TimeUnit;
 
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
-@RequestMapping("/api/v1/bookingRoom")
+@RequestMapping("/api/v1/booking-room")
 public class BookingRoomController {
     @Autowired
     private BookingRoomService bookingRoomService;
-
-    @Autowired
-    private BookingRoomRepository bookingRoomRepository;
-
     LocalDateTime localDateTime = LocalDateTime.now();
 
 //    @GetMapping("/booking-room/check-out-reminder")
@@ -86,7 +82,7 @@ public class BookingRoomController {
 
     private final List<SseEmitter> emitterList = new CopyOnWriteArrayList<>();
 
-    @PostMapping("/booking-room/check-out-reminder/register")
+    @PostMapping("/check-out-reminder/register")
     public SseEmitter registerCheckOutReminder() {
         SseEmitter emitter = new SseEmitter();
         emitterList.add(emitter);

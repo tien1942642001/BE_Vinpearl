@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public interface BookingRoomService {
@@ -26,4 +27,6 @@ public interface BookingRoomService {
     Long findAllByMonth(Long startMonth, Long endMonth);
 
     BookingRoom checkOutRoom(Long id);
+
+    Map<String, Long> getBookingRoomCountByMonth();
 }

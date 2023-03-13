@@ -35,4 +35,6 @@ public class Customer extends BaseEntity {
 
     private String wards;
 
+    private String token;
+
 }

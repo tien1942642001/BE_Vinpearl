@@ -11,12 +11,12 @@ import javax.persistence.*;
 @Getter
 @Setter
 public class TicketType extends BaseEntity {
+    @Column(name = "name")
     private String name;
 
+    @Column(name = "total_seat")
     private Long totalSeat;
 
-    private Long priceVnd;
-
-    private Long priceUsd;
-
+    @Column(name = "price")
+    private Long price;
 }

@@ -19,10 +19,14 @@ public interface BookingRoomRepository extends  PagingAndSortingRepository<Booki
             "(:startTime is null or b.checkIn >= :startTime) and (:endTime is null or b.checkOut <= :endTime)")
     Page<BookingRoom> searchBookingRoomsPage(Long startTime, Long endTime, Pageable pageable);
 
-    @Query("SELECT COUNT(b.id) FROM BookingRoom b WHERE b.checkIn >= :startMonth and b.checkIn <= :endMonth")
+    @Query("SELECT COUNT(b.id) FROM BookingRoom b WHERE b.checkIn between :startMonth and :endMonth")
     Long findAllByMonth(Long startMonth, Long endMonth);
+
+    @Query("SELECT b.customer.fullName, COUNT(b.customer.fullName) AS totalBookings FROM BookingRoom b WHERE b.room.roomTypeId = :roomTypeId GROUP BY b.customer.fullName ORDER BY totalBookings DESC")
+    List<Object[]> findTopCustomersByRoomType( Long roomTypeId);
 
     List<BookingRoom> findByRoomId(Long roomId);
 
-//    List<BookingRoom> findByCheckOutTimeBetween(LocalDateTime start, LocalDateTime end);
+    @Query("SELECT b FROM BookingRoom b")
+    List<BookingRoom> findAllBookingRoom();
 }

@@ -2,10 +2,7 @@ package dev.kienntt.demo.BE_Vinpearl.service.serviceImpl;
 
 import dev.kienntt.demo.BE_Vinpearl.domain.request.BookingRequest;
 import dev.kienntt.demo.BE_Vinpearl.domain.request.BookingRoomRequest;
-import dev.kienntt.demo.BE_Vinpearl.model.BookingRoom;
-import dev.kienntt.demo.BE_Vinpearl.model.Customer;
-import dev.kienntt.demo.BE_Vinpearl.model.Room;
-import dev.kienntt.demo.BE_Vinpearl.model.RoomType;
+import dev.kienntt.demo.BE_Vinpearl.model.*;
 import dev.kienntt.demo.BE_Vinpearl.repository.BookingRoomRepository;
 import dev.kienntt.demo.BE_Vinpearl.repository.CustomerRepository;
 import dev.kienntt.demo.BE_Vinpearl.repository.RoomRepository;
@@ -27,6 +24,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class BookingServiceImpl implements BookingRoomService {
@@ -69,7 +67,7 @@ public class BookingServiceImpl implements BookingRoomService {
                 .orElseThrow(() -> new RuntimeException("Room Type ID cannot be null."));
 
         Long customerId = bookingRoomRequest.getCustomerId();
-        customerRepository.findById(customerId)
+        Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer ID cannot be null."));
 
         // Kiểm tra số phòng còn lại trong loại phòng
@@ -103,10 +101,11 @@ public class BookingServiceImpl implements BookingRoomService {
 
         // Send confirmation email
         String to = "kienntt.iist@gmail.com";
+//        String to = customer.getEmail();
         String subject = "Booking Confirmation";
         String text = "Dear customer, your booking has been confirmed. Thank you for choosing our hotel.";
         try {
-            emailService.sendEmail(to, subject, text);
+            emailService.sendHtmlEmail(to, subject, text);
         } catch (MessagingException e) {
             throw new RuntimeException("Error sending email");
         }
@@ -211,6 +210,16 @@ public class BookingServiceImpl implements BookingRoomService {
 //        invoice.append("Total price: ").append(bookingRoom.getTotalPrice()).append("\n");
 //        return invoice.toString();
 //    }
+
+    public Map<String, Long> getBookingRoomCountByMonth() {
+        List<BookingRoom> bookingRooms = bookingRoomRepository.findAllBookingRoom();
+        Map<String, Long> bookingTourCountByMonth = bookingRooms.stream()
+                .collect(Collectors.groupingBy(
+                        bookingRoom -> String.format("Tháng %01d", bookingRoom.getPaymentDate().getMonthValue()),
+                        Collectors.counting()
+                ));
+        return bookingTourCountByMonth;
+    }
 
     public Room getRandomAvailableRoom(List<Room> availableRooms) {
         if (availableRooms.isEmpty()) {

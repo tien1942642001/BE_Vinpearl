@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.config;
 
+import dev.kienntt.demo.BE_Vinpearl.model.Customer;
 import dev.kienntt.demo.BE_Vinpearl.model.User;
 import io.jsonwebtoken.*;
 
@@ -21,10 +22,30 @@ public class JwtTokenProvider {
 
         Instant now = Instant.now();
         String jwtToken = Jwts.builder()
-                .claim("email", "Jane Doe")
-                .claim("password", "jane@example.com")
-                .claim("fullName", "jane@example.com")
-                .setSubject("jane")
+                .claim("email", user.getEmail())
+                .claim("password", user.getPassword())
+                .claim("fullName", user.getFullName())
+                .setSubject(user.getEmail())
+                .setId(UUID.randomUUID().toString())
+                .setIssuedAt(Date.from(now))
+//                .setExpiration(Date.from(now.plus(1l, ChronoUnit.MINUTES)))
+                .setExpiration(Date.from(now.plus(30, ChronoUnit.DAYS)))
+                .signWith(privateKey)
+                .compact();
+
+        return jwtToken;
+    }
+
+    public static String createJwtSignedHMAC1(Customer customer) throws InvalidKeySpecException, NoSuchAlgorithmException {
+
+        PrivateKey privateKey = getPrivateKey();
+
+        Instant now = Instant.now();
+        String jwtToken = Jwts.builder()
+                .claim("email", customer.getEmail())
+                .claim("password", customer.getPassword())
+                .claim("fullName", customer.getFullName())
+                .setSubject(customer.getEmail())
                 .setId(UUID.randomUUID().toString())
                 .setIssuedAt(Date.from(now))
 //                .setExpiration(Date.from(now.plus(1l, ChronoUnit.MINUTES)))
