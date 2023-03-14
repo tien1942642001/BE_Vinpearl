@@ -49,6 +49,9 @@ public class BookingRoom extends BaseEntity {
     @Column(name = "service_id")
     private Long serviceId;
 
+    @Transient
+    private String ip;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "customer_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Customer customer;

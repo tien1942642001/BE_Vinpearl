@@ -1,5 +1,7 @@
 package dev.kienntt.demo.BE_Vinpearl.service.serviceImpl;
 
+import dev.kienntt.demo.BE_Vinpearl.domain.dto.HotelDto;
+import dev.kienntt.demo.BE_Vinpearl.domain.dto.ImageHotelDto;
 import dev.kienntt.demo.BE_Vinpearl.model.Hotel;
 import dev.kienntt.demo.BE_Vinpearl.model.ImageHotel;
 import dev.kienntt.demo.BE_Vinpearl.repository.HotelRepository;

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletRequest;
 import javax.xml.bind.DatatypeConverter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -62,25 +63,13 @@ public class PaymentServiceImpl implements PaymentService {
         vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
         vnp_Params.put("vnp_Amount", String.valueOf(vnp_Amount));
         vnp_Params.put("vnp_CurrCode", vnp_CurrCode);
-//        vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
         vnp_Params.put("vnp_TxnRef", UUID.randomUUID().toString().replace("-", ""));
         vnp_Params.put("vnp_OrderInfo", vnp_OrderInfo);
         vnp_Params.put("vnp_OrderType", "other");
         vnp_Params.put("vnp_ReturnUrl", vnp_Returnurl);
         vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
         vnp_Params.put("vnp_CreateDate", vnp_TxnTime);
-//        String vnp_SecureHashType = "SHA256";
-//        vnp_Params.put("vnp_SecureHashType", vnp_SecureHashType);
 
-//        vnp_Params.put("vnp_SecureHash", vnp_SecureHash);
-//
-//        String vnp_Url_Params = VnPayUtils.buildQueryUrl(vnp_Params);
-//
-//        String redirectUrl = vnp_Url + "?" + vnp_Url_Params;
-
-//        return redirectUrl;
-
-//        String vnp_SecureHash = VnPayUtils.hashAllFields(vnp_Params, vnp_HashSecret);
         //Build data to hash and querystring
         List fieldNames = new ArrayList(vnp_Params.keySet());
         Collections.sort(fieldNames);
@@ -160,5 +149,16 @@ public class PaymentServiceImpl implements PaymentService {
             params.put(parts[0], parts[1]);
         }
         return params;
+    }
+
+    public String getRemoteIP(HttpServletRequest request) {
+        String ipAddress = request.getHeader("X-Forwarded-For");
+        if (ipAddress == null) {
+            ipAddress = request.getHeader("X-Real-IP");
+        }
+        if (ipAddress == null) {
+            ipAddress = request.getRemoteAddr();
+        }
+        return ipAddress;
     }
 }
