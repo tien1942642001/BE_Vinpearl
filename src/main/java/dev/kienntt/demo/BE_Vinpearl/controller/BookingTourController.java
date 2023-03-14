@@ -25,6 +25,12 @@ public class BookingTourController {
         return new ResponseMessage(200, "Đặt tour thành công", "", null);
     }
 
+    @GetMapping("/customer/{id}")
+    public ResponseEntity<List<BookingTour>> getBookingByCustomer(@PathVariable Long id) {
+        List<BookingTour> list = bookingTourService.findByCustomerId(id);
+        return ResponseEntity.ok().body(list);
+    }
+
     @GetMapping("/top-tours")
     public ResponseEntity<List<Tour>> getTopTours(@RequestParam int limit) {
         List<Tour> topTours = bookingTourService.getTopTours(limit);

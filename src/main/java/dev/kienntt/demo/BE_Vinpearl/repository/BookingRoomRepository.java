@@ -1,6 +1,7 @@
 package dev.kienntt.demo.BE_Vinpearl.repository;
 
 import dev.kienntt.demo.BE_Vinpearl.model.BookingRoom;
+import dev.kienntt.demo.BE_Vinpearl.model.BookingTour;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,4 +30,7 @@ public interface BookingRoomRepository extends  PagingAndSortingRepository<Booki
 
     @Query("SELECT b FROM BookingRoom b")
     List<BookingRoom> findAllBookingRoom();
+
+    @Query("SELECT b FROM BookingRoom b where b.customerId = :id")
+    List<BookingRoom> findByCustomerId(Long id);
 }

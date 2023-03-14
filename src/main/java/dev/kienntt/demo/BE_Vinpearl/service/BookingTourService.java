@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.service;
 
+import dev.kienntt.demo.BE_Vinpearl.model.BookingRoom;
 import dev.kienntt.demo.BE_Vinpearl.model.BookingTour;
 import dev.kienntt.demo.BE_Vinpearl.model.Customer;
 import dev.kienntt.demo.BE_Vinpearl.model.Tour;
@@ -12,6 +13,8 @@ public interface BookingTourService {
     Iterable findAll();
 
     Optional findById(Long id);
+
+    List<BookingTour> findByCustomerId(Long id);
 
     BookingTour save(BookingTour bookingTour);
 

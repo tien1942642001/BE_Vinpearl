@@ -7,7 +7,6 @@ import dev.kienntt.demo.BE_Vinpearl.repository.BookingTourRepository;
 import dev.kienntt.demo.BE_Vinpearl.repository.CustomerRepository;
 import dev.kienntt.demo.BE_Vinpearl.service.BookingTourService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.sql.Date;
@@ -31,6 +30,11 @@ public class BookingTourServiceImpl implements BookingTourService {
     @Override
     public Optional<BookingTour> findById(Long id) {
         return bookingTourRepository.findById(id);
+    }
+
+    @Override
+    public List<BookingTour> findByCustomerId(Long id) {
+        return bookingTourRepository.findByCustomerId(id);
     }
 
     @Override

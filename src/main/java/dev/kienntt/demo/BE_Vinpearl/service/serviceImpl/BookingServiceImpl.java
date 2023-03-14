@@ -1,6 +1,7 @@
 package dev.kienntt.demo.BE_Vinpearl.service.serviceImpl;
 
-import dev.kienntt.demo.BE_Vinpearl.domain.request.BookingRequest;
+import dev.kienntt.demo.BE_Vinpearl.config.VnPayConfig;
+import dev.kienntt.demo.BE_Vinpearl.config.VnPayUtils;
 import dev.kienntt.demo.BE_Vinpearl.domain.request.BookingRoomRequest;
 import dev.kienntt.demo.BE_Vinpearl.model.*;
 import dev.kienntt.demo.BE_Vinpearl.repository.BookingRoomRepository;
@@ -9,17 +10,16 @@ import dev.kienntt.demo.BE_Vinpearl.repository.RoomRepository;
 import dev.kienntt.demo.BE_Vinpearl.repository.RoomTypeRepository;
 import dev.kienntt.demo.BE_Vinpearl.service.BookingRoomService;
 import dev.kienntt.demo.BE_Vinpearl.service.EmailService;
-import dev.kienntt.demo.BE_Vinpearl.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.mail.MessagingException;
-import java.nio.file.AccessDeniedException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -28,6 +28,19 @@ import java.util.stream.Collectors;
 
 @Service
 public class BookingServiceImpl implements BookingRoomService {
+
+    private static final String PAYMENT_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+    private static final String QUERY_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+
+    @Autowired
+    private VnPayConfig vnPayConfig;
+
+    @Value("${vnpay.tmncode}")
+    private String tmnCode;
+
+    @Value("${vnpay.hashsecret}")
+    private String hashSecret;
+
     @Autowired
     private BookingRoomRepository bookingRoomRepository;
 
@@ -61,7 +74,12 @@ public class BookingServiceImpl implements BookingRoomService {
     }
 
     @Override
-    public BookingRoom save(BookingRoomRequest bookingRoomRequest) {
+    public List<BookingRoom> findByCustomerId(Long id) {
+        return bookingRoomRepository.findByCustomerId(id);
+    }
+
+    @Override
+    public BookingRoom save(BookingRoomRequest bookingRoomRequest) throws UnsupportedEncodingException {
         Long roomTypeId = bookingRoomRequest.getRoomTypeId();
         RoomType roomType = roomTypeRepository.findById(roomTypeId)
                 .orElseThrow(() -> new RuntimeException("Room Type ID cannot be null."));
@@ -76,7 +94,13 @@ public class BookingServiceImpl implements BookingRoomService {
         }
 
         List<Room> availableRooms = roomRepository.findByRoomTypeId(roomTypeId, 0);
+        if (availableRooms.isEmpty()) {
+            new RuntimeException("No room available");
+        }
+
         Room roomRandom =  getRandomAvailableRoom(availableRooms);
+
+        createPaymentUrl(bookingRoomRequest);
 
         LocalDateTime dateCheckIn =
                 Instant.ofEpochMilli(bookingRoomRequest.getCheckIn()).atZone(ZoneId.systemDefault()).toLocalDateTime();
@@ -93,22 +117,21 @@ public class BookingServiceImpl implements BookingRoomService {
 
         bookingRoomRepository.save(bookingRoom1);
 
-        // Giảm số phòng còn lại trong loại phòng
-        roomType.setNumberOfRooms(roomType.getNumberOfRooms() - 1);
-        roomTypeRepository.save(roomType);
-        roomRandom.setStatus(1);
-        roomRepository.save(roomRandom);
+//        // Giảm số phòng còn lại trong loại phòng
+//        roomType.setNumberOfRooms(roomType.getNumberOfRooms() - 1);
+//        roomTypeRepository.save(roomType);
+//        roomRandom.setStatus(1);
+//        roomRepository.save(roomRandom);
 
-        // Send confirmation email
-        String to = "kienntt.iist@gmail.com";
+//        // Send confirmation email
 //        String to = customer.getEmail();
-        String subject = "Booking Confirmation";
-        String text = "Dear customer, your booking has been confirmed. Thank you for choosing our hotel.";
-        try {
-            emailService.sendHtmlEmail(to, subject, text);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Error sending email");
-        }
+//        String subject = "Booking Confirmation";
+//        String text = "Dear customer, your booking has been confirmed. Thank you for choosing our hotel.";
+//        try {
+//            emailService.sendEmail(to, subject, text);
+//        } catch (MessagingException e) {
+//            throw new RuntimeException("Error sending email");
+//        }
 
         return null;
     }
@@ -229,5 +252,86 @@ public class BookingServiceImpl implements BookingRoomService {
 
         int randomIndex = new Random().nextInt(availableRooms.size());
         return availableRooms.get(randomIndex);
+    }
+
+    @Override
+    public String createPaymentUrl(BookingRoomRequest bookingRoomRequest) throws UnsupportedEncodingException {
+        Long roomTypeId = bookingRoomRequest.getRoomTypeId();
+        RoomType roomType = roomTypeRepository.findById(roomTypeId)
+                .orElseThrow(() -> new RuntimeException("Room Type ID cannot be null."));
+
+        Long customerId = bookingRoomRequest.getCustomerId();
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Customer ID cannot be null."));
+
+        // Kiểm tra số phòng còn lại trong loại phòng
+        if (roomType.getNumberOfRooms() <= 0) {
+            new RuntimeException("No room available");
+        }
+
+        List<Room> availableRooms = roomRepository.findByRoomTypeId(roomTypeId, 0);
+        if (availableRooms.isEmpty()) {
+            new RuntimeException("No room available");
+        }
+
+        Room roomRandom =  getRandomAvailableRoom(availableRooms);
+        String vnp_Returnurl = vnPayConfig.getReturnUrl();
+        String vnp_TmnCode = vnPayConfig.getTmnCode();
+        String vnp_HashSecret = vnPayConfig.getHashSecret();
+        String vnp_Url = vnPayConfig.getUrl();
+        String vnp_Version = vnPayConfig.getVersion();
+        String vnp_Command = vnPayConfig.getCommand();
+//        String vnp_TxnRef = VnPayUtils.getRandomNumber(8);
+        String vnp_OrderInfo = bookingRoomRequest.getDescription();
+        long vnp_Amount = bookingRoomRequest.getPaymentAmount() * 100;
+        String vnp_IpAddr = bookingRoomRequest.getIp();
+        String vnp_CurrCode = "VND";
+        String vnp_Locale = "vn";
+        String vnp_TxnTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+
+        Map<String, String> vnp_Params = new HashMap<>();
+        vnp_Params.put("vnp_Version", vnp_Version);
+        vnp_Params.put("vnp_Locale", vnp_Locale);
+        vnp_Params.put("vnp_Command", vnp_Command);
+        vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
+        vnp_Params.put("vnp_Amount", String.valueOf(vnp_Amount));
+        vnp_Params.put("vnp_CurrCode", vnp_CurrCode);
+        vnp_Params.put("vnp_TxnRef", UUID.randomUUID().toString().replace("-", ""));
+        vnp_Params.put("vnp_OrderInfo", vnp_OrderInfo);
+        vnp_Params.put("vnp_OrderType", "other");
+        vnp_Params.put("vnp_ReturnUrl", vnp_Returnurl);
+        vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
+        vnp_Params.put("vnp_CreateDate", vnp_TxnTime);
+
+        //Build data to hash and querystring
+        List fieldNames = new ArrayList(vnp_Params.keySet());
+        Collections.sort(fieldNames);
+        StringBuilder hashData = new StringBuilder();
+        StringBuilder query = new StringBuilder();
+        Iterator itr = fieldNames.iterator();
+        while (itr.hasNext()) {
+            String fieldName = (String) itr.next();
+            String fieldValue = (String) vnp_Params.get(fieldName);
+            if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                //Build hash data
+                hashData.append(fieldName);
+                hashData.append('=');
+                hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                //Build query
+                query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
+                query.append('=');
+                query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                if (itr.hasNext()) {
+                    query.append('&');
+                    hashData.append('&');
+                }
+            }
+        }
+        String queryUrl = query.toString();
+
+        String vnp_SecureHash = VnPayUtils.hmacSHA512(vnp_HashSecret, hashData.toString());
+        queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
+        String paymentUrl = vnp_Url + "?" + queryUrl;
+        return paymentUrl;
     }
 }

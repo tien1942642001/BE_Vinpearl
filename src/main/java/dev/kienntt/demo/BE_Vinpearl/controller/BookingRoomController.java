@@ -4,6 +4,7 @@ import dev.kienntt.demo.BE_Vinpearl.domain.request.BookingRequest;
 import dev.kienntt.demo.BE_Vinpearl.domain.request.BookingRoomRequest;
 import dev.kienntt.demo.BE_Vinpearl.model.BookingRoom;
 import dev.kienntt.demo.BE_Vinpearl.base.ResponseMessage;
+import dev.kienntt.demo.BE_Vinpearl.model.BookingTour;
 import dev.kienntt.demo.BE_Vinpearl.repository.BookingRoomRepository;
 import dev.kienntt.demo.BE_Vinpearl.service.BookingRoomService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -28,57 +31,13 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("/api/v1/booking-room")
 public class BookingRoomController {
+
+    @Autowired
+    private HttpServletRequest request;
+
     @Autowired
     private BookingRoomService bookingRoomService;
     LocalDateTime localDateTime = LocalDateTime.now();
-
-//    @GetMapping("/booking-room/check-out-reminder")
-//    public List<BookingRoom> getCheckOutReminder() {
-//        LocalDateTime now = LocalDateTime.now();
-//        LocalDateTime oneHourLater = now.plusHours(1);
-//        return bookingRoomRepository.findByCheckOutTimeBetween(now, oneHourLater);
-//    }
-
-//    @GetMapping("/booking-room/check-out-reminder/sse")
-//    public SseEmitter getCheckOutReminderSse() {
-//        SseEmitter emitter = new SseEmitter();
-//        List<BookingRoom> reminderList = getCheckOutReminder();
-//
-//        for (BookingRoom bookingRoom : reminderList) {
-//            try {
-//                emitter.send(SseEmitter.event()
-//                        .data(bookingRoom, MediaType.APPLICATION_JSON)
-//                        .name("check-out-reminder"));
-//            } catch (IOException e) {
-//                emitter.completeWithError(e);
-//                break;
-//            }
-//        }
-//
-//        return emitter;
-//    }
-
-//    @Bean
-//    public ScheduledExecutorService reminderExecutor() {
-//        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(1);
-//        executor.setRemoveOnCancelPolicy(true);
-//        executor.scheduleWithFixedDelay(() -> {
-//            List<BookingRoom> reminderList = getCheckOutReminder();
-//            for (SseEmitter emitter : emitterList) {
-//                try {
-//                    for (BookingRoom bookingRoom : reminderList) {
-//                        emitter.send(SseEmitter.event()
-//                                .data(bookingRoom, MediaType.APPLICATION_JSON)
-//                                .name("check-out-reminder"));
-//                    }
-//                } catch (IOException e) {
-//                    emitterList.remove(emitter);
-//                }
-//            }
-//        }, 0, 10, TimeUnit.MINUTES);
-//
-//        return executor;
-//    }
 
     private final List<SseEmitter> emitterList = new CopyOnWriteArrayList<>();
 
@@ -91,9 +50,17 @@ public class BookingRoomController {
     }
 
     @PostMapping("/booking")
-    public ResponseEntity<?> bookRoom(@RequestBody BookingRoomRequest bookingRoomRequest) {
-        bookingRoomService.save(bookingRoomRequest);
-        return ResponseEntity.ok(bookingRoomRequest);
+    public ResponseEntity<?> bookRoom(@RequestBody BookingRoomRequest bookingRoomRequest) throws UnsupportedEncodingException {
+        bookingRoomRequest.setIp(getRemoteIP(request));
+        System.out.println(getRemoteIP(request));
+        String redirectUrl = bookingRoomService.createPaymentUrl(bookingRoomRequest);
+        return ResponseEntity.ok(redirectUrl);
+    }
+
+    @GetMapping("/customer/{id}")
+    public ResponseEntity<List<BookingRoom>> getBookingByCustomer(@PathVariable Long id) {
+        List<BookingRoom> list = bookingRoomService.findByCustomerId(id);
+        return ResponseEntity.ok().body(list);
     }
 
     @PutMapping("/{id}/checkout")
@@ -136,5 +103,17 @@ public class BookingRoomController {
                                            Pageable pageable) {
         Page<BookingRoom> list = bookingRoomService.searchBookingRoomsPage(startTime, endTime, pageable);
         return new ResponseMessage(200, "Success", list, null);
+    }
+
+    public String getRemoteIP(HttpServletRequest request) {
+        String ipAddress = request.getHeader("X-Forwarded-For");
+        if (ipAddress == null) {
+            ipAddress = request.getHeader("X-Real-IP");
+        }
+        if (ipAddress == null) {
+            ipAddress = request.getRemoteAddr();
+//            ipAddress = request.getLocalAddr();
+        }
+        return ipAddress;
     }
 }

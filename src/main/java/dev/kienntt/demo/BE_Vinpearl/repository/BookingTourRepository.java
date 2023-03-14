@@ -15,4 +15,7 @@ public interface BookingTourRepository extends PagingAndSortingRepository<Bookin
 
     @Query("SELECT b FROM BookingTour b")
     List<BookingTour> findAllBookingTour();
+
+    @Query("SELECT b FROM BookingTour b where b.customerId = :id")
+    List<BookingTour> findByCustomerId(Long id);
 }
