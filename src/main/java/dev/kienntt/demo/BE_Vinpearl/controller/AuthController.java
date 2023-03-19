@@ -48,10 +48,8 @@ public class AuthController {
         User userDb = userService.findByEmail(user.getEmail());
         String md5Password = DigestUtils.md5Hex(user.getPassword()).toUpperCase();
 //        System.out.println("Verify: " + userDb.getPassword().equals(md5Password));
-        if (!userDb.getEmail().equals(user.getEmail())) {
-            return new ResponseMessage(400, "Fail","Tài khoản không tồn tại", null);
-        } else if (!userDb.getPassword().equals(md5Password)) {
-            return new ResponseMessage(400, "Fail", "Mật khẩu không đúng", null);
+        if (!userDb.getPassword().equals(md5Password)) {
+            return new ResponseMessage(404, "Fail", "Tài đăng nhập/ Mật khẩu không đúng", null);
         }
         JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
         userDb.setToken(jwtTokenProvider.createJwtSignedHMAC(userDb));

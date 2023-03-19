@@ -14,11 +14,16 @@ import java.util.Set;
 @Table(name = "service")
 @Getter
 @Setter
-public class Service extends BaseEntity {
-    @Column(name = "name", nullable = false)
+public class Service {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", nullable = false)
+    private Long id;
+
+    @Column(name = "name")
     private String name;
 
-    @Column(name = "price", nullable = false)
+    @Column(name = "price")
     private Long price;
 
     @Column(name = "room_type_id")

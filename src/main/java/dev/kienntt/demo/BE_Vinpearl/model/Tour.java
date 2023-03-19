@@ -69,11 +69,17 @@ public class Tour extends BaseEntity {
     @Column(name = "number_of_people")
     private Long numberOfPeople;
 
+    @Column(name = "remaining_of_people")
+    private Long remainingOfPeople;
+
     @Transient
     private Long expirationDateMls;
 
     @Transient
-    private Long price;
+    private Long priceAdult;
+
+    @Transient
+    private Long priceChildren;
 
 //    @OneToOne()
 //    @JoinColumn(name = "siteId", referencedColumnName = "id", insertable = false, updatable = false)

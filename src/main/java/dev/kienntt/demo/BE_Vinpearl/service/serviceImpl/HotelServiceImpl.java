@@ -66,6 +66,11 @@ public class HotelServiceImpl implements HotelService {
         return hotelRepository.searchHotel(siteId, name, totalRoom, phone, pageable);
     }
 
+    @Override
+    public Page<Hotel> getListHotel(Long siteId, String name, Long totalRoom, String phone, Pageable pageable) {
+        return hotelRepository.getListHotel(siteId, name, totalRoom, phone, pageable);
+    }
+
 //    public Long getLowestServicePriceByRoomTypeId(Long roomTypeId) {
 //        List<RoomTypeService> roomTypeServices = roomTypeServiceRepository.findByRoomTypeId(roomTypeId);
 //        if (roomTypeServices.isEmpty()) {

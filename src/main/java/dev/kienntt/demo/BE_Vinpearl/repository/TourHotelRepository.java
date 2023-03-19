@@ -12,12 +12,4 @@ public interface TourHotelRepository extends PagingAndSortingRepository<TourHote
 
     List<TourHotel> findByTourId(Long tourId);
     List<TourHotel> findByHotelId(Long hotelId);
-
-
-    List<TourProjection> findProjectedByTourId(Long tourId);
-
-    public interface TourProjection {
-        Long getId();
-        String getPrice();
-    }
 }

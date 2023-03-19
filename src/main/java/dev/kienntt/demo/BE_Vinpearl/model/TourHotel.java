@@ -28,8 +28,11 @@ public class TourHotel {
     @JoinColumn(name = "hotel_id", nullable = false, insertable = false, updatable = false)
     private Hotel hotel;
 
-    @Column(name = "price")
-    private Long price;
+    @Column(name = "price_children")
+    private Long priceChildren;
+
+    @Column(name = "price_adult")
+    private Long priceAdult;
 
     @Column(name = "description")
     private String description;

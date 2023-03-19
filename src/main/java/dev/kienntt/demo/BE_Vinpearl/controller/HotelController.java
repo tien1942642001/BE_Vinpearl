@@ -89,6 +89,16 @@ public class HotelController {
                 .orElseGet(() -> new ResponseMessage(404, "Error", null, "No result with query"));
     }
 
+    @GetMapping("/search/customer")
+    public ResponseMessage getListHotel(@RequestParam(required = false) Long siteId,
+                                            @RequestParam(required = false) Long totalRoom,
+                                            @RequestParam(required = false) String name,
+                                            @RequestParam(required = false) String phone,
+                                            Pageable pageable) {
+        Page<Hotel> listHotel = hotelService.getListHotel(siteId, name, totalRoom, phone, pageable);
+        return new ResponseMessage(200, "Success", listHotel, null);
+    }
+
     @GetMapping("/search")
     public ResponseMessage searchHotelsPage(@RequestParam(required = false) Long siteId,
                                             @RequestParam(required = false) Long totalRoom,

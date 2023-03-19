@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @Table(name = "booking_tour")
 public class BookingTour extends BaseEntity {
+    private String code;
 
     private LocalDateTime paymentDate;
 
@@ -19,7 +20,7 @@ public class BookingTour extends BaseEntity {
 
     private Long paymentStatus;
 
-    private Long numberParent;
+    private Long numberAdult;
 
     private Long numberChildren;
 
@@ -40,4 +41,11 @@ public class BookingTour extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "roomId", nullable = false, insertable = false, updatable = false)
     private Room room;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "tourId", nullable = false, insertable = false, updatable = false)
+    private Tour tour;
+
+    @Transient
+    private String url;
 }
