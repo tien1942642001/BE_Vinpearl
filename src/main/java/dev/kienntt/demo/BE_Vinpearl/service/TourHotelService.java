@@ -9,6 +9,4 @@ public interface TourHotelService {
     List<TourHotel> findTourHotelByTourId(Long tourId);
 
     List<TourHotel> findTourHotelByHotelId(Long hotelId);
-
-    List<TourHotelRepository.TourProjection> findProjectedByTourId(Long tourId);
 }

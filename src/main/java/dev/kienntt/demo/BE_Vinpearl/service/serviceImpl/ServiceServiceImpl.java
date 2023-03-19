@@ -73,7 +73,6 @@ public class ServiceServiceImpl implements ServiceService {
 
     @Override
     public ServiceDescription saveServiceDescriptionContent(Service service) {
-
         for (Long descriptionId: service.getDescriptionIds()) {
             ServiceDescription serviceDescription = new ServiceDescription();
             serviceDescription.setDescriptionId(descriptionId);

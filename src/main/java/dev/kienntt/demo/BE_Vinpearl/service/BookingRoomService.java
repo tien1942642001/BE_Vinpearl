@@ -7,6 +7,8 @@ import dev.kienntt.demo.BE_Vinpearl.model.BookingTour;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
@@ -20,13 +22,15 @@ public interface BookingRoomService {
 
     List<BookingRoom> findByCustomerId(Long id);
 
+    BookingRoom findByPaymentCode(String paymentCode);
+
     BookingRoom save(BookingRoomRequest bookingRoomRequest) throws UnsupportedEncodingException;
 
     BookingRoom update(Long bookingRoomId, BookingRoom bookingRoomDetails) throws AccessDeniedException;
 
     void deleteBookingRoom(Long id);
 
-    Page<BookingRoom> searchBookingRoomsPage(Long startTime, Long endTime, Pageable pageable);
+    Page<BookingRoom> searchBookingRoomsPage(Long customerId, String code,Long status, Long startTime, Long endTime, Pageable pageable);
 
     Long findAllByMonth(Long startMonth, Long endMonth);
 
@@ -34,5 +38,9 @@ public interface BookingRoomService {
 
     Map<String, Long> getBookingRoomCountByMonth();
 
-    String createPaymentUrl(BookingRoomRequest bookingRoomRequest) throws UnsupportedEncodingException;
+    BookingRoom saveBookingRoom(BookingRoomRequest bookingRoomRequest) throws UnsupportedEncodingException;
+
+    BookingRoom checkPaymentOk(Long bookingRoomId, BookingRoom bookingRoomDetails);
+
+    public void exportToExcel(List<BookingRoom> bookingRooms, HttpServletResponse response) throws IOException;
 }

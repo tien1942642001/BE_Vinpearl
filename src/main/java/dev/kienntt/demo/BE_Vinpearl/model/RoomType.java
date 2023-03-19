@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dev.kienntt.demo.BE_Vinpearl.base.BaseEntity;
 import lombok.*;
@@ -18,8 +19,8 @@ public class RoomType extends BaseEntity {
     @Column(name = "acreage")
     private Long acreage;
 
-    @Column(name = "number_parent")
-    private Long numberParent;
+    @Column(name = "number_adult")
+    private Long numberAdult;
 
     @Column(name = "number_children")
     private Long numberChildren;
@@ -33,6 +34,9 @@ public class RoomType extends BaseEntity {
     @Column(name = "number_of_rooms")
     private Long numberOfRooms;
 
+    @Column(name = "remaining_of_rooms")
+    private Long remainingOfRooms;
+
     @OneToMany(mappedBy = "roomTypeId", fetch = FetchType.EAGER)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
@@ -43,7 +47,7 @@ public class RoomType extends BaseEntity {
     @OneToMany(mappedBy = "roomTypes", fetch = FetchType.EAGER)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    @JsonIgnoreProperties("roomTypes")
+    @JsonIgnore
     private Set<Room> rooms;
 
     @OneToMany(mappedBy = "roomType", fetch = FetchType.EAGER)

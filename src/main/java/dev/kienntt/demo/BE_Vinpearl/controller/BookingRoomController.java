@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDateTime;
@@ -50,15 +51,25 @@ public class BookingRoomController {
     }
 
     @PostMapping("/booking")
-    public ResponseEntity<?> bookRoom(@RequestBody BookingRoomRequest bookingRoomRequest) throws UnsupportedEncodingException {
-        bookingRoomRequest.setIp(getRemoteIP(request));
-        System.out.println(getRemoteIP(request));
-        String redirectUrl = bookingRoomService.createPaymentUrl(bookingRoomRequest);
-        return ResponseEntity.ok(redirectUrl);
+    public ResponseMessage createNewBookingRoom(@RequestBody BookingRoomRequest bookingRoomRequest) throws UnsupportedEncodingException {
+        BookingRoom bookingRoom = bookingRoomService.saveBookingRoom(bookingRoomRequest);
+        return  new ResponseMessage(200, "OK", bookingRoom, null);
+    }
+
+    @PutMapping("/check-payment-room-ok/{id}")
+    public ResponseMessage checkPaymentRoomOk(@PathVariable("id") Long id, @RequestBody BookingRoom bookingRoom) {
+        bookingRoomService.checkPaymentOk(id, bookingRoom);
+        return new ResponseMessage(200, "OK", "", null);
     }
 
     @GetMapping("/customer/{id}")
     public ResponseEntity<List<BookingRoom>> getBookingByCustomer(@PathVariable Long id) {
+        List<BookingRoom> list = bookingRoomService.findByCustomerId(id);
+        return ResponseEntity.ok().body(list);
+    }
+
+    @GetMapping("/detail/{id}")
+    public ResponseEntity<List<BookingRoom>> getBookingByCustomer1(@PathVariable Long id) {
         List<BookingRoom> list = bookingRoomService.findByCustomerId(id);
         return ResponseEntity.ok().body(list);
     }
@@ -69,39 +80,20 @@ public class BookingRoomController {
         return ResponseEntity.ok(id);
     }
 
-//    @PostMapping("/create")
-//    public ResponseMessage createNewBookingRoom(@RequestBody BookingRoom bookingRoom) {
-//        bookingRoom.setCreatedDate(localDateTime.toString());
-//        bookingRoomService.save(bookingRoom);
-//        return  new ResponseMessage(200, "Tạo booking thành công", null, null);
-//    }
-//
-//    @PostMapping("/admin/create")
-//    public ResponseMessage createBookingRoomAdmin(@RequestBody BookingRoom bookingRoom) {
-//        bookingRoom.setCreatedDate(localDateTime.toString());
-//        bookingRoomService.save(bookingRoom);
-//        return  new ResponseMessage(200, "Tạo booking thành công", null, null);
-//    }
-//
-//    @PostMapping("/update")
-//    public ResponseMessage updateBookingRoom(@RequestBody BookingRoom bookingRoom) {
-//        bookingRoom.setCreatedDate(localDateTime.toString());
-//        bookingRoomService.save(bookingRoom);
-//        return  new ResponseMessage(200, "Cập nhật booking thành công", null, null);
-//    }
-
-    @GetMapping("/detail/{id}")
-    public ResponseMessage detailBookingRoom(@PathVariable Long id) {
-        Optional<BookingRoom> bookingRoomOptional = bookingRoomService.findById(id);
-        return bookingRoomOptional.map(bookingRoom -> new ResponseMessage(200, "Success", bookingRoom, null))
-                .orElseGet(() -> new ResponseMessage(404, "Error", null, "No result with query"));
+    @GetMapping("/findByPaymentCode/{id}")
+    public ResponseMessage findByPaymentCode(@PathVariable String id) {
+        BookingRoom bookingRoom = bookingRoomService.findByPaymentCode(id);
+        return new ResponseMessage(200, "Success", bookingRoom, null);
     }
 
     @GetMapping("/search")
-    public ResponseMessage searchRoomsPage(@RequestParam(required = false) Long startTime,
+    public ResponseMessage searchRoomsPage(@RequestParam(required = false) Long customerId,
+                                           @RequestParam(required = false) String code,
+                                            @RequestParam(required = false) Long status,
+                                            @RequestParam(required = false) Long startTime,
                                            @RequestParam(required = false) Long endTime,
                                            Pageable pageable) {
-        Page<BookingRoom> list = bookingRoomService.searchBookingRoomsPage(startTime, endTime, pageable);
+        Page<BookingRoom> list = bookingRoomService.searchBookingRoomsPage(customerId, code, status, startTime, endTime, pageable);
         return new ResponseMessage(200, "Success", list, null);
     }
 
@@ -115,5 +107,11 @@ public class BookingRoomController {
 //            ipAddress = request.getLocalAddr();
         }
         return ipAddress;
+    }
+
+    @GetMapping("/export")
+    public void exportToExcel(HttpServletResponse response) throws IOException {
+        List<BookingRoom> bookingRooms = bookingRoomService.findAll();
+        bookingRoomService.exportToExcel(bookingRooms, response);
     }
 }

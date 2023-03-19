@@ -20,6 +20,6 @@ public interface RoomTypeService {
 
     void deleteRoomType(Long id);
 
-    Page<RoomType> searchRoomTypesPage(Long hotelId, Long acreage, String name, Pageable pageable);
+    Page<RoomType> searchRoomTypesPage(Long numberPerson, Long hotelId, Long acreage, String name, Pageable pageable);
 
 }

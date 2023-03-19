@@ -47,7 +47,8 @@ public class TourController {
                                       @RequestParam Long lengthStayId,
                                       @RequestParam Long suitableId,
                                       @RequestParam Long typeOfTourId,
-                                      @RequestParam Long price,
+                                      @RequestParam Long priceAdult,
+                                      @RequestParam Long priceChildren,
                                       @RequestParam Long numberOfPeople,
                                       @RequestParam Long expirationDateMls,
                                        @RequestParam MultipartFile[] images) throws IOException {
@@ -64,7 +65,8 @@ public class TourController {
         tour.setTypeOfTourId(typeOfTourId);
         tour.setNumberOfPeople(numberOfPeople);
         tour.setExpirationDateMls(expirationDateMls);
-        tour.setPrice(price);
+        tour.setPriceAdult(priceAdult);
+        tour.setPriceChildren(priceChildren);
         tourService.save(tour, images);
         return new ResponseMessage(200, "Success", "", null);
     }

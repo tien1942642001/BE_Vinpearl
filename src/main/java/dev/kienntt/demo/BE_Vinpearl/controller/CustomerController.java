@@ -46,15 +46,15 @@ public class CustomerController {
         return new ResponseMessage(200, "Success", customerService.findAll(), null);
     }
 
-    @GetMapping("/detail")
+    @GetMapping("/detail/{id}")
     public ResponseMessage getSite(@PathVariable Long id) {
         Optional<Customer> siteOptional = customerService.findById(id);
         return siteOptional.map(site -> new ResponseMessage(200, "Success", site, null))
                 .orElseGet(() -> new ResponseMessage(404, "Error", null, "No result with query"));
     }
 
-    @PutMapping("/updateSite")
-    public ResponseMessage updateSite(@PathVariable Long id, @RequestBody Customer customer) {
+    @PutMapping("/update/{id}")
+    public ResponseMessage update(@PathVariable Long id, @RequestBody Customer customer) {
         Optional<Customer> customerOptional = customerService.findById(id);
         return customerOptional.map(site1 -> {
             customer.setId(site1.getId());
@@ -64,8 +64,8 @@ public class CustomerController {
                 .orElseGet(() -> new ResponseMessage(404, "Error", null, "No result with query"));
     }
 
-    @GetMapping("/deleteSite")
-    public ResponseMessage deleteSite(@PathVariable Long id) {
+    @GetMapping("/delete")
+    public ResponseMessage delete(@PathVariable Long id) {
         Optional<Customer> customerOptional = customerService.findById(id);
         return customerOptional.map(site -> {
             customerService.remove(id);

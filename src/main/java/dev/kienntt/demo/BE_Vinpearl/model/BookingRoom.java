@@ -13,11 +13,16 @@ import java.time.LocalDateTime;
 @Setter
 @Table(name = "booking_room")
 public class BookingRoom extends BaseEntity {
+    @Column(name = "code")
+    private String code;
     @Column(name = "check_in")
     private LocalDateTime checkIn;
 
     @Column(name = "check_out")
     private LocalDateTime checkOut;
+
+    @Column(name = "payment_code")
+    private String paymentCode;
 
     @Column(name = "payment_date")
     private LocalDateTime paymentDate;
@@ -28,8 +33,8 @@ public class BookingRoom extends BaseEntity {
     @Column(name = "payment_status")
     private Long paymentStatus;
 
-    @Column(name = "number_parent")
-    private Long numberParent;
+    @Column(name = "number_adult")
+    private Long numberAdult;
 
     @Column(name = "number_children")
     private Long numberChildren;
@@ -52,15 +57,18 @@ public class BookingRoom extends BaseEntity {
     @Transient
     private String ip;
 
+    @Transient
+    private String url;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "customer_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Customer customer;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne()
     @JoinColumn(name = "room_id", nullable = false, insertable = false, updatable = false)
     private Room room;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "service_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Service service;
 }

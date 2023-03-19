@@ -17,8 +17,11 @@ public interface BookingRoomRepository extends  PagingAndSortingRepository<Booki
 //    List<BookingRoom> findBookingRoomBy(long departmentId, Pageable pageable);
 
     @Query("SELECT b FROM BookingRoom b WHERE " +
+            "(:customerId is null or b.customerId = :customerId) and " +
+            "(:status is null or b.paymentStatus = :status) and " +
+            "(:code is null or b.code LIKE CONCAT('%',:code, '%')) and " +
             "(:startTime is null or b.checkIn >= :startTime) and (:endTime is null or b.checkOut <= :endTime)")
-    Page<BookingRoom> searchBookingRoomsPage(Long startTime, Long endTime, Pageable pageable);
+    Page<BookingRoom> searchBookingRoomsPage(Long customerId, String code, Long status, Long startTime, Long endTime, Pageable pageable);
 
     @Query("SELECT COUNT(b.id) FROM BookingRoom b WHERE b.checkIn between :startMonth and :endMonth")
     Long findAllByMonth(Long startMonth, Long endMonth);
@@ -33,4 +36,7 @@ public interface BookingRoomRepository extends  PagingAndSortingRepository<Booki
 
     @Query("SELECT b FROM BookingRoom b where b.customerId = :id")
     List<BookingRoom> findByCustomerId(Long id);
+
+    @Query("SELECT b FROM BookingRoom b where b.paymentCode = :paymentCode")
+    BookingRoom findByPaymentCode(String paymentCode);
 }

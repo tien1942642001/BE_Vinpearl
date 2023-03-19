@@ -10,12 +10,21 @@ import dev.kienntt.demo.BE_Vinpearl.repository.RoomRepository;
 import dev.kienntt.demo.BE_Vinpearl.repository.RoomTypeRepository;
 import dev.kienntt.demo.BE_Vinpearl.service.BookingRoomService;
 import dev.kienntt.demo.BE_Vinpearl.service.EmailService;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -79,6 +88,11 @@ public class BookingServiceImpl implements BookingRoomService {
     }
 
     @Override
+    public BookingRoom findByPaymentCode(String paymentCode) {
+        return bookingRoomRepository.findByPaymentCode(paymentCode);
+    }
+
+    @Override
     public BookingRoom save(BookingRoomRequest bookingRoomRequest) throws UnsupportedEncodingException {
         Long roomTypeId = bookingRoomRequest.getRoomTypeId();
         RoomType roomType = roomTypeRepository.findById(roomTypeId)
@@ -100,10 +114,8 @@ public class BookingServiceImpl implements BookingRoomService {
 
         Room roomRandom =  getRandomAvailableRoom(availableRooms);
 
-        createPaymentUrl(bookingRoomRequest);
-
         LocalDateTime dateCheckIn =
-                Instant.ofEpochMilli(bookingRoomRequest.getCheckIn()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    Instant.ofEpochMilli(bookingRoomRequest.getCheckIn()).atZone(ZoneId.systemDefault()).toLocalDateTime();
 
         LocalDateTime dateCheckOut =
                 Instant.ofEpochMilli(bookingRoomRequest.getCheckOut()).atZone(ZoneId.systemDefault()).toLocalDateTime();
@@ -114,11 +126,12 @@ public class BookingServiceImpl implements BookingRoomService {
         bookingRoom1.setCustomerId(customerId);
         bookingRoom1.setCheckIn(dateCheckIn);
         bookingRoom1.setCheckOut(dateCheckOut);
+        bookingRoom1.setServiceId(bookingRoomRequest.getServiceId());
 
-        bookingRoomRepository.save(bookingRoom1);
+        BookingRoom bookingRoom = bookingRoomRepository.save(bookingRoom1);
 
 //        // Giảm số phòng còn lại trong loại phòng
-//        roomType.setNumberOfRooms(roomType.getNumberOfRooms() - 1);
+//        roomType.setRemainingOfRooms(roomType.getRemainingOfRooms() - 1);
 //        roomTypeRepository.save(roomType);
 //        roomRandom.setStatus(1);
 //        roomRepository.save(roomRandom);
@@ -133,7 +146,7 @@ public class BookingServiceImpl implements BookingRoomService {
 //            throw new RuntimeException("Error sending email");
 //        }
 
-        return null;
+        return bookingRoomRepository.save(bookingRoom);
     }
 
     @Override
@@ -155,7 +168,7 @@ public class BookingServiceImpl implements BookingRoomService {
         bookingRoom.setPaymentDate(bookingRoomDetails.getPaymentDate());
         bookingRoom.setPaymentAmount(bookingRoomDetails.getPaymentAmount());
         bookingRoom.setPaymentStatus(bookingRoomDetails.getPaymentStatus());
-        bookingRoom.setNumberParent(bookingRoomDetails.getNumberParent());
+        bookingRoom.setNumberAdult(bookingRoomDetails.getNumberAdult());
         bookingRoom.setNumberChildren(bookingRoomDetails.getNumberChildren());
         bookingRoom.setDescription(bookingRoomDetails.getDescription());
         bookingRoom.setPerNight(bookingRoomDetails.getPerNight());
@@ -176,9 +189,9 @@ public class BookingServiceImpl implements BookingRoomService {
     }
 
     @Override
-    public Page<BookingRoom> searchBookingRoomsPage(Long startTime, Long endTime, Pageable pageable) {
+    public Page<BookingRoom> searchBookingRoomsPage(Long customerId, String code, Long stauts, Long startTime, Long endTime, Pageable pageable) {
 //        PageRequest page_req = new PageRequest(0, buildingId, Sort.Direction.DESC, "idNode");
-        return bookingRoomRepository.searchBookingRoomsPage(startTime, endTime, pageable);
+        return bookingRoomRepository.searchBookingRoomsPage(customerId, code, stauts, startTime, endTime, pageable);
     }
 
     @Override
@@ -201,7 +214,7 @@ public class BookingServiceImpl implements BookingRoomService {
         }
 
         // Kiểm tra số lượng khách hợp lệ
-        Long numberOfGuests = bookingRoom.getNumberParent();
+        Long numberOfGuests = bookingRoom.getNumberAdult();
 
         // Tính toán số tiền phải thanh toán
         bookingRoomRepository.save(bookingRoom);
@@ -254,27 +267,7 @@ public class BookingServiceImpl implements BookingRoomService {
         return availableRooms.get(randomIndex);
     }
 
-    @Override
     public String createPaymentUrl(BookingRoomRequest bookingRoomRequest) throws UnsupportedEncodingException {
-        Long roomTypeId = bookingRoomRequest.getRoomTypeId();
-        RoomType roomType = roomTypeRepository.findById(roomTypeId)
-                .orElseThrow(() -> new RuntimeException("Room Type ID cannot be null."));
-
-        Long customerId = bookingRoomRequest.getCustomerId();
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer ID cannot be null."));
-
-        // Kiểm tra số phòng còn lại trong loại phòng
-        if (roomType.getNumberOfRooms() <= 0) {
-            new RuntimeException("No room available");
-        }
-
-        List<Room> availableRooms = roomRepository.findByRoomTypeId(roomTypeId, 0);
-        if (availableRooms.isEmpty()) {
-            new RuntimeException("No room available");
-        }
-
-        Room roomRandom =  getRandomAvailableRoom(availableRooms);
         String vnp_Returnurl = vnPayConfig.getReturnUrl();
         String vnp_TmnCode = vnPayConfig.getTmnCode();
         String vnp_HashSecret = vnPayConfig.getHashSecret();
@@ -284,7 +277,8 @@ public class BookingServiceImpl implements BookingRoomService {
 //        String vnp_TxnRef = VnPayUtils.getRandomNumber(8);
         String vnp_OrderInfo = bookingRoomRequest.getDescription();
         long vnp_Amount = bookingRoomRequest.getPaymentAmount() * 100;
-        String vnp_IpAddr = bookingRoomRequest.getIp();
+//        String vnp_IpAddr = bookingRoomRequest.getIp();
+        String vnp_IpAddr = "192.168.100.3";
         String vnp_CurrCode = "VND";
         String vnp_Locale = "vn";
         String vnp_TxnTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
@@ -296,7 +290,7 @@ public class BookingServiceImpl implements BookingRoomService {
         vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
         vnp_Params.put("vnp_Amount", String.valueOf(vnp_Amount));
         vnp_Params.put("vnp_CurrCode", vnp_CurrCode);
-        vnp_Params.put("vnp_TxnRef", UUID.randomUUID().toString().replace("-", ""));
+        vnp_Params.put("vnp_TxnRef", bookingRoomRequest.getPaymentCode());
         vnp_Params.put("vnp_OrderInfo", vnp_OrderInfo);
         vnp_Params.put("vnp_OrderType", "other");
         vnp_Params.put("vnp_ReturnUrl", vnp_Returnurl);
@@ -332,6 +326,145 @@ public class BookingServiceImpl implements BookingRoomService {
         String vnp_SecureHash = VnPayUtils.hmacSHA512(vnp_HashSecret, hashData.toString());
         queryUrl += "&vnp_SecureHash=" + vnp_SecureHash;
         String paymentUrl = vnp_Url + "?" + queryUrl;
+
+        if (paymentUrl.isEmpty()) {
+
+        }
         return paymentUrl;
     }
+
+    @Override
+    public BookingRoom saveBookingRoom(BookingRoomRequest bookingRoomRequest) throws UnsupportedEncodingException {
+        Long roomTypeId = bookingRoomRequest.getRoomTypeId();
+        RoomType roomType = roomTypeRepository.findById(roomTypeId)
+                .orElseThrow(() -> new RuntimeException("Room Type ID cannot be null."));
+
+        Long customerId = bookingRoomRequest.getCustomerId();
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Customer ID cannot be null."));
+
+        // Kiểm tra số phòng còn lại trong loại phòng
+        if (roomType.getRemainingOfRooms() <= 0) {
+            new RuntimeException("No room available");
+        }
+
+        List<Room> availableRooms = roomRepository.findByRoomTypeId(roomTypeId, 0);
+        if (availableRooms.isEmpty()) {
+            new RuntimeException("No room available");
+        }
+
+        Room roomRandom =  getRandomAvailableRoom(availableRooms);
+
+        LocalDateTime dateCheckIn =
+                Instant.ofEpochMilli(bookingRoomRequest.getCheckIn()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+        LocalDateTime dateCheckOut =
+                Instant.ofEpochMilli(bookingRoomRequest.getCheckOut()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        String paymentCode = UUID.randomUUID().toString().replace("-", "");
+        // Tạo mới đối tượng BookingRoom và lưu vào database
+        BookingRoom bookingRoom1 = new BookingRoom();
+        bookingRoom1.setRoomId(roomRandom.getId());
+        bookingRoom1.setCustomerId(customerId);
+        bookingRoom1.setCheckIn(dateCheckIn);
+        bookingRoom1.setCheckOut(dateCheckOut);
+        bookingRoom1.setCheckOut(dateCheckOut);
+        bookingRoom1.setDescription(bookingRoomRequest.getDescription());
+        bookingRoom1.setPaymentAmount(bookingRoomRequest.getPaymentAmount());
+        bookingRoom1.setRoomId(bookingRoomRequest.getRoomTypeId());
+        bookingRoom1.setServiceId(bookingRoomRequest.getServiceId());
+        bookingRoom1.setNumberAdult(bookingRoomRequest.getNumberAdult());
+        bookingRoom1.setNumberChildren(bookingRoomRequest.getNumberChildren());
+        bookingRoom1.setPaymentCode(paymentCode);
+        bookingRoom1.setPaymentStatus(0L);
+
+        BookingRoom bookingRoom = bookingRoomRepository.save(bookingRoom1);
+
+        bookingRoom.setCode(String.format("VPT-NHHYU%06d", bookingRoom.getId()));
+        bookingRoomRepository.save(bookingRoom);
+
+        bookingRoomRequest.setPaymentCode(paymentCode);
+        String paymentUrl = createPaymentUrl(bookingRoomRequest);
+        if (paymentUrl.isEmpty()) {
+            return null;
+        }
+        bookingRoom.setUrl(paymentUrl);
+
+        return bookingRoom;
+    }
+
+    @Override
+    @Transactional
+    public BookingRoom checkPaymentOk(Long bookingRoomId, BookingRoom bookingRoomDetails) {
+        // Code to book hotel
+        BookingRoom bookingRoom = bookingRoomRepository.findById(bookingRoomId)
+                .orElseThrow(() -> new RuntimeException("Booking ID cannot be null."));
+
+        Long roomId = bookingRoomDetails.getRoomId();
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("Room ID cannot be null."));
+
+        Long customerId = bookingRoomDetails.getCustomerId();
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Customer ID cannot be null."));
+
+        bookingRoom.setPaymentStatus(1L);
+        bookingRoomRepository.save(bookingRoom);
+//        if (bookingRoomDetails.getPaymentStatus() == 2) {
+            room.getRoomTypes().setRemainingOfRooms(room.getRoomTypes().getRemainingOfRooms() - 1);
+            room.setStatus(1);
+            roomRepository.save(room);
+
+            Optional<RoomType> roomType = roomTypeRepository.findById(room.getRoomTypeId());
+            roomTypeRepository.updateRemainingOfRooms(room.getRoomTypeId(), roomType.get().getRemainingOfRooms() - 1);
+//        }
+
+//        bookingRoom.setService(bookingRoomDetails.getService());
+
+        return bookingRoomRepository.save(bookingRoom);
+    }
+    @Override
+    public void exportToExcel(List<BookingRoom> bookingRooms, HttpServletResponse response) throws IOException {
+        // Set the headers for the response
+        response.setContentType("application/octet-stream");
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=booking_report.xlsx";
+        response.setHeader(headerKey, headerValue);
+
+        // Create the workbook and add a sheet
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Booking Report");
+
+        // Create the header row
+        String[] headers = {"Mã đơn hàng", "Tên khách hàng", "Email", "Số điện thoại", "Ngày check-in", "Ngày check-out", "Phòng", "Loại phòng", "Loại dịch vụ", "Ngày chuyển khoản", "Số tiền", "Trạng thái"};
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers[i]);
+        }
+
+        // Add the booking data to the sheet
+        int rowNum = 1;
+        for (BookingRoom bookingRoom : bookingRooms) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(bookingRoom.getCode());
+            row.createCell(1).setCellValue(bookingRoom.getCustomer().getFullName());
+            row.createCell(2).setCellValue(bookingRoom.getCustomer().getEmail());
+            row.createCell(3).setCellValue(bookingRoom.getCustomer().getPhone());
+            row.createCell(4).setCellValue(bookingRoom.getCheckIn());
+            row.createCell(5).setCellValue(bookingRoom.getCheckOut());
+            row.createCell(6).setCellValue(bookingRoom.getRoom().getNumberRoom());
+            row.createCell(7).setCellValue(bookingRoom.getRoom().getRoomTypes().getName());
+            row.createCell(8).setCellValue(bookingRoom.getService().getName());
+            row.createCell(9).setCellValue(bookingRoom.getPaymentDate());
+            row.createCell(10).setCellValue(bookingRoom.getPaymentAmount());
+            row.createCell(11).setCellValue(bookingRoom.getPaymentStatus());
+        }
+
+        // Write the workbook to the response output stream
+        OutputStream outputStream = response.getOutputStream();
+        workbook.write(outputStream);
+        workbook.close();
+        outputStream.close();
+    }
+
 }

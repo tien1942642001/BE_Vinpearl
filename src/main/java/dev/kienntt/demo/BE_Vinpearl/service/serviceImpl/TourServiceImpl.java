@@ -58,6 +58,7 @@ public class TourServiceImpl implements TourService {
         LocalDateTime getExpirationDate =
                 Instant.ofEpochMilli(tour.getExpirationDateMls()).atZone(ZoneId.systemDefault()).toLocalDateTime();
         tour.setExpirationDate(getExpirationDate);
+        tour.setRemainingOfPeople(tour.getNumberOfPeople());
         Tour tour1 = tourRepository.save(tour);
         tour1.setCode(String.format("GN%06d", tour1.getId()));
         for (MultipartFile image : images) {
@@ -65,12 +66,14 @@ public class TourServiceImpl implements TourService {
         }
         List<Hotel> hotelList = hotelRepository.findBySiteId(tour.getLeavingToId());
         for (Hotel hotel : hotelList) {
-            Long minPriceRoomType = roomTypeRepository.findMinPriceByRoomTypeName(hotel.getId());
-            Long priceTourHotel = tour.getPrice() + minPriceRoomType;
+            Long minPriceRoomType = roomTypeRepository.findMinPriceByRoomTypeName(hotel.getId()) != null ? roomTypeRepository.findMinPriceByRoomTypeName(hotel.getId()) : 0;
+            Long priceAdultTourHotel = tour.getPriceAdult() + minPriceRoomType;
+            Long priceChildrenTourHotel = tour.getPriceChildren() + minPriceRoomType;
             TourHotel tourHotel = new TourHotel();
             tourHotel.setTourId(tour1.getId());
             tourHotel.setHotelId(hotel.getId());
-            tourHotel.setPrice(priceTourHotel);
+            tourHotel.setPriceAdult(priceAdultTourHotel);
+            tourHotel.setPriceChildren(priceChildrenTourHotel);
             tourHotelRepository.save(tourHotel);
         }
         return null;

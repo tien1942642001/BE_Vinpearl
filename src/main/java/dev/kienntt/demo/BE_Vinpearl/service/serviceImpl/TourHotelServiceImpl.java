@@ -21,8 +21,4 @@ public class TourHotelServiceImpl implements TourHotelService {
     public List<TourHotel> findTourHotelByHotelId(Long hotelId) {
         return tourHotelRepository.findByHotelId(hotelId);
     }
-
-    public List<TourHotelRepository.TourProjection> findProjectedByTourId(Long tourId) {
-        return tourHotelRepository.findProjectedByTourId(tourId);
-    }
 }

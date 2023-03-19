@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import dev.kienntt.demo.BE_Vinpearl.base.BaseEntity;
 import lombok.*;
@@ -38,7 +39,6 @@ public class Room extends BaseEntity {
 
     @ManyToOne()
     @JoinColumn(name = "room_type_id", nullable = false, insertable = false, updatable = false)
-    @JsonIgnoreProperties("roomTypes")
     private RoomType roomTypes;
 
     @Column(name = "status")
