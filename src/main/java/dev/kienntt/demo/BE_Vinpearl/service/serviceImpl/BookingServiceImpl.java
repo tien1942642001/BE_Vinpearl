@@ -3,17 +3,13 @@ package dev.kienntt.demo.BE_Vinpearl.service.serviceImpl;
 import dev.kienntt.demo.BE_Vinpearl.config.VnPayConfig;
 import dev.kienntt.demo.BE_Vinpearl.config.VnPayUtils;
 import dev.kienntt.demo.BE_Vinpearl.domain.request.BookingRoomRequest;
+import dev.kienntt.demo.BE_Vinpearl.domain.request.SearchExportRequest;
 import dev.kienntt.demo.BE_Vinpearl.model.*;
-import dev.kienntt.demo.BE_Vinpearl.repository.BookingRoomRepository;
-import dev.kienntt.demo.BE_Vinpearl.repository.CustomerRepository;
-import dev.kienntt.demo.BE_Vinpearl.repository.RoomRepository;
-import dev.kienntt.demo.BE_Vinpearl.repository.RoomTypeRepository;
+import dev.kienntt.demo.BE_Vinpearl.repository.*;
 import dev.kienntt.demo.BE_Vinpearl.service.BookingRoomService;
 import dev.kienntt.demo.BE_Vinpearl.service.EmailService;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,17 +17,19 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -55,6 +53,9 @@ public class BookingServiceImpl implements BookingRoomService {
 
     @Autowired
     private RoomRepository roomRepository;
+
+    @Autowired
+    private HotelRepository hotelRepository;
 
     @Autowired
     private RoomTypeRepository roomTypeRepository;
@@ -94,36 +95,42 @@ public class BookingServiceImpl implements BookingRoomService {
 
     @Override
     public BookingRoom save(BookingRoomRequest bookingRoomRequest) throws UnsupportedEncodingException {
+        Long hotelId = bookingRoomRequest.getHotelId();
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách sạn"));
+
         Long roomTypeId = bookingRoomRequest.getRoomTypeId();
         RoomType roomType = roomTypeRepository.findById(roomTypeId)
-                .orElseThrow(() -> new RuntimeException("Room Type ID cannot be null."));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy loại phòng"));
 
         Long customerId = bookingRoomRequest.getCustomerId();
         Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer ID cannot be null."));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
 
         // Kiểm tra số phòng còn lại trong loại phòng
         if (roomType.getNumberOfRooms() <= 0) {
-            new RuntimeException("No room available");
+            new RuntimeException("Loại phòng này đã hết phòng");
         }
-
-        List<Room> availableRooms = roomRepository.findByRoomTypeId(roomTypeId, 0);
-        if (availableRooms.isEmpty()) {
-            new RuntimeException("No room available");
-        }
-
-        Room roomRandom =  getRandomAvailableRoom(availableRooms);
 
         LocalDateTime dateCheckIn =
-                    Instant.ofEpochMilli(bookingRoomRequest.getCheckIn()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+                Instant.ofEpochMilli(bookingRoomRequest.getCheckIn()).atZone(ZoneId.systemDefault()).toLocalDateTime();
 
         LocalDateTime dateCheckOut =
                 Instant.ofEpochMilli(bookingRoomRequest.getCheckOut()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+//        List<Room> availableRooms = roomRepository.findByRoomTypeId(roomTypeId, 0L);
+        List<Room> availableRooms = roomRepository.findRoomEmpty(roomTypeId, 0L, dateCheckIn, dateCheckOut);
+        if (availableRooms.isEmpty()) {
+            new RuntimeException("Không có phòng trống");
+        }
+
+        Room roomRandom =  getRandomAvailableRoom(availableRooms);
 
         // Tạo mới đối tượng BookingRoom và lưu vào database
         BookingRoom bookingRoom1 = new BookingRoom();
         bookingRoom1.setRoomId(roomRandom.getId());
         bookingRoom1.setCustomerId(customerId);
+        bookingRoom1.setHotelId(hotelId);
         bookingRoom1.setCheckIn(dateCheckIn);
         bookingRoom1.setCheckOut(dateCheckOut);
         bookingRoom1.setServiceId(bookingRoomRequest.getServiceId());
@@ -162,10 +169,11 @@ public class BookingServiceImpl implements BookingRoomService {
         Long customerId = bookingRoomDetails.getCustomerId();
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Customer ID cannot be null."));
+        LocalDateTime localDateTime = LocalDateTime.now();
 
         bookingRoom.setCheckIn(bookingRoomDetails.getCheckIn());
         bookingRoom.setCheckOut(bookingRoomDetails.getCheckOut());
-        bookingRoom.setPaymentDate(bookingRoomDetails.getPaymentDate());
+        bookingRoom.setPaymentDate(localDateTime);
         bookingRoom.setPaymentAmount(bookingRoomDetails.getPaymentAmount());
         bookingRoom.setPaymentStatus(bookingRoomDetails.getPaymentStatus());
         bookingRoom.setNumberAdult(bookingRoomDetails.getNumberAdult());
@@ -189,9 +197,10 @@ public class BookingServiceImpl implements BookingRoomService {
     }
 
     @Override
-    public Page<BookingRoom> searchBookingRoomsPage(Long customerId, String code, Long stauts, Long startTime, Long endTime, Pageable pageable) {
-//        PageRequest page_req = new PageRequest(0, buildingId, Sort.Direction.DESC, "idNode");
-        return bookingRoomRepository.searchBookingRoomsPage(customerId, code, stauts, startTime, endTime, pageable);
+    public Page<BookingRoom> searchBookingRoomsPage(String code, Long status, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        return bookingRoomRepository.searchBookingRoomsPage(code, status, startDateTime, endDateTime, pageable);
     }
 
     @Override
@@ -218,7 +227,7 @@ public class BookingServiceImpl implements BookingRoomService {
 
         // Tính toán số tiền phải thanh toán
         bookingRoomRepository.save(bookingRoom);
-        room.get().setStatus(0);
+        room.get().setStatus(0L);
         roomRepository.save(room.get());
 
         System.out.println("Thanh toán thành công. Tổng số tiền phải thanh toán là " + bookingRoom.getPaymentAmount() + " đồng.");
@@ -281,8 +290,9 @@ public class BookingServiceImpl implements BookingRoomService {
         String vnp_IpAddr = "192.168.100.3";
         String vnp_CurrCode = "VND";
         String vnp_Locale = "vn";
-        String vnp_TxnTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-
+//        String vnp_TxnTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        Date date = Date.from(bookingRoomRequest.getPaymentDate().atZone(ZoneId.systemDefault()).toInstant());
+        String vnp_TxnTime = new SimpleDateFormat("yyyyMMddHHmmss").format(date);
         Map<String, String> vnp_Params = new HashMap<>();
         vnp_Params.put("vnp_Version", vnp_Version);
         vnp_Params.put("vnp_Locale", vnp_Locale);
@@ -348,7 +358,7 @@ public class BookingServiceImpl implements BookingRoomService {
             new RuntimeException("No room available");
         }
 
-        List<Room> availableRooms = roomRepository.findByRoomTypeId(roomTypeId, 0);
+        List<Room> availableRooms = roomRepository.findByRoomTypeId(roomTypeId, 0L);
         if (availableRooms.isEmpty()) {
             new RuntimeException("No room available");
         }
@@ -360,17 +370,18 @@ public class BookingServiceImpl implements BookingRoomService {
 
         LocalDateTime dateCheckOut =
                 Instant.ofEpochMilli(bookingRoomRequest.getCheckOut()).atZone(ZoneId.systemDefault()).toLocalDateTime();
-        String paymentCode = UUID.randomUUID().toString().replace("-", "");
+        String paymentCode = "Hotel" + UUID.randomUUID().toString().replace("-", "");
+        LocalDateTime paymentDate = LocalDateTime.now();
         // Tạo mới đối tượng BookingRoom và lưu vào database
         BookingRoom bookingRoom1 = new BookingRoom();
         bookingRoom1.setRoomId(roomRandom.getId());
         bookingRoom1.setCustomerId(customerId);
+        bookingRoom1.setHotelId(bookingRoomRequest.getHotelId());
         bookingRoom1.setCheckIn(dateCheckIn);
-        bookingRoom1.setCheckOut(dateCheckOut);
         bookingRoom1.setCheckOut(dateCheckOut);
         bookingRoom1.setDescription(bookingRoomRequest.getDescription());
         bookingRoom1.setPaymentAmount(bookingRoomRequest.getPaymentAmount());
-        bookingRoom1.setRoomId(bookingRoomRequest.getRoomTypeId());
+//        bookingRoom1.setRoomId(bookingRoomRequest.getRoomTypeId());
         bookingRoom1.setServiceId(bookingRoomRequest.getServiceId());
         bookingRoom1.setNumberAdult(bookingRoomRequest.getNumberAdult());
         bookingRoom1.setNumberChildren(bookingRoomRequest.getNumberChildren());
@@ -380,9 +391,11 @@ public class BookingServiceImpl implements BookingRoomService {
         BookingRoom bookingRoom = bookingRoomRepository.save(bookingRoom1);
 
         bookingRoom.setCode(String.format("VPT-NHHYU%06d", bookingRoom.getId()));
+        bookingRoom.setPaymentDate(paymentDate);
         bookingRoomRepository.save(bookingRoom);
 
         bookingRoomRequest.setPaymentCode(paymentCode);
+        bookingRoomRequest.setPaymentDate(paymentDate);
         String paymentUrl = createPaymentUrl(bookingRoomRequest);
         if (paymentUrl.isEmpty()) {
             return null;
@@ -394,10 +407,9 @@ public class BookingServiceImpl implements BookingRoomService {
 
     @Override
     @Transactional
-    public BookingRoom checkPaymentOk(Long bookingRoomId, BookingRoom bookingRoomDetails) {
+    public BookingRoom checkPaymentOk(String code, BookingRoom bookingRoomDetails) {
         // Code to book hotel
-        BookingRoom bookingRoom = bookingRoomRepository.findById(bookingRoomId)
-                .orElseThrow(() -> new RuntimeException("Booking ID cannot be null."));
+        BookingRoom bookingRoom = bookingRoomRepository.findByPaymentCode(code);
 
         Long roomId = bookingRoomDetails.getRoomId();
         Room room = roomRepository.findById(roomId)
@@ -411,7 +423,7 @@ public class BookingServiceImpl implements BookingRoomService {
         bookingRoomRepository.save(bookingRoom);
 //        if (bookingRoomDetails.getPaymentStatus() == 2) {
             room.getRoomTypes().setRemainingOfRooms(room.getRoomTypes().getRemainingOfRooms() - 1);
-            room.setStatus(1);
+            room.setStatus(1L);
             roomRepository.save(room);
 
             Optional<RoomType> roomType = roomTypeRepository.findById(room.getRoomTypeId());
@@ -419,52 +431,147 @@ public class BookingServiceImpl implements BookingRoomService {
 //        }
 
 //        bookingRoom.setService(bookingRoomDetails.getService());
-
         return bookingRoomRepository.save(bookingRoom);
     }
+
     @Override
-    public void exportToExcel(List<BookingRoom> bookingRooms, HttpServletResponse response) throws IOException {
+    public List<BookingRoom> searchExport(SearchExportRequest searchExportRequest) {
+        LocalDateTime startDateTime = searchExportRequest.getStartDate().atStartOfDay();
+        LocalDateTime endDateTime = searchExportRequest.getEndDate().atTime(LocalTime.MAX);
+        return bookingRoomRepository.searchExport(startDateTime, endDateTime, searchExportRequest.getStatus());
+    }
+
+    @Override
+    public byte[] exportToExcel(List<BookingRoom> bookingRooms, LocalDate startDate, LocalDate endDate, HttpServletResponse response) throws IOException {
         // Set the headers for the response
         response.setContentType("application/octet-stream");
         String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=booking_report.xlsx";
+        String headerValue = "attachment; filename=booking_report_" + LocalDate.now() + ".xlsx";
         response.setHeader(headerKey, headerValue);
 
-        // Create the workbook and add a sheet
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Booking Report");
 
+        int firstMovedIndex = 0;
+        int lastMovedIndex = 5;
+        int moveRowCount = 1;
+        sheet.shiftRows(firstMovedIndex, lastMovedIndex, moveRowCount, true, false);
+
         // Create the header row
         String[] headers = {"Mã đơn hàng", "Tên khách hàng", "Email", "Số điện thoại", "Ngày check-in", "Ngày check-out", "Phòng", "Loại phòng", "Loại dịch vụ", "Ngày chuyển khoản", "Số tiền", "Trạng thái"};
-        Row headerRow = sheet.createRow(0);
+        Row headerRow = sheet.createRow(6);
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);
             cell.setCellValue(headers[i]);
+            sheet.autoSizeColumn(i);
         }
 
-        // Add the booking data to the sheet
-        int rowNum = 1;
+        // Tạo tiêu đề báo cáo
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String startDateStr = formatter.format(startDate);
+        String endDateStr = formatter.format(endDate);
+
+        String title = "Báo cáo từ ngày " + startDateStr + " tới ngày " + endDateStr;
+        Row titleRow = sheet.createRow(0);
+        Cell titleCell = titleRow.createCell(0);
+        titleCell.setCellValue(title);
+        titleCell.setCellStyle(getTitleStyle(workbook));
+
+        // Merge rows 2 to 6
+        CellRangeAddress mergedRegion = new CellRangeAddress(0, 4, 0, headers.length - 1);
+        sheet.addMergedRegion(mergedRegion);
+
+        // Tạo đối tượng font và set độ lớn font chữ và kiểu in nghiêng cho startDateStr
+        Font font = workbook.createFont();
+        font.setFontHeightInPoints((short)24);
+        font.setItalic(true);
+        font.setBold(true);
+
+// Canh giữa tiêu đề báo cáo
+        CellStyle titleStyle = getTitleStyle(workbook);
+        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        titleCell.setCellStyle(titleStyle);
+        titleStyle.setFont(font);
+
+// Add the booking data to the sheet
+        int rowNum = 8;
         for (BookingRoom bookingRoom : bookingRooms) {
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(bookingRoom.getCode());
             row.createCell(1).setCellValue(bookingRoom.getCustomer().getFullName());
             row.createCell(2).setCellValue(bookingRoom.getCustomer().getEmail());
             row.createCell(3).setCellValue(bookingRoom.getCustomer().getPhone());
-            row.createCell(4).setCellValue(bookingRoom.getCheckIn());
-            row.createCell(5).setCellValue(bookingRoom.getCheckOut());
+
+            DateTimeFormatter formatterCheckIn = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+            String formattedCheckIn = bookingRoom.getCheckIn().format(formatterCheckIn);
+
+            row.createCell(4).setCellValue(formattedCheckIn);
+
+            DateTimeFormatter formatterCheckOut = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+            String formattedCheckOut = bookingRoom.getCheckOut().format(formatterCheckOut);
+
+            row.createCell(5).setCellValue(formattedCheckOut);
+
             row.createCell(6).setCellValue(bookingRoom.getRoom().getNumberRoom());
             row.createCell(7).setCellValue(bookingRoom.getRoom().getRoomTypes().getName());
             row.createCell(8).setCellValue(bookingRoom.getService().getName());
-            row.createCell(9).setCellValue(bookingRoom.getPaymentDate());
-            row.createCell(10).setCellValue(bookingRoom.getPaymentAmount());
-            row.createCell(11).setCellValue(bookingRoom.getPaymentStatus());
+
+            DateTimeFormatter formatterPaymentDate = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+            String formattedPaymentDate = bookingRoom.getPaymentDate().format(formatterPaymentDate);
+
+            row.createCell(9).setCellValue(formattedPaymentDate);
+
+
+            DecimalFormat decimalFormat = new DecimalFormat("#,##0");
+            String formattedPrice = decimalFormat.format(bookingRoom.getPaymentAmount());
+            String formattedPriceWithDot = formattedPrice.replace(",", ".");
+            row.createCell(10).setCellValue(formattedPriceWithDot + " VNĐ");
+
+            if (bookingRoom.getPaymentStatus() == 0) {
+                row.createCell(11).setCellValue("Đã hủy");
+            } else if (bookingRoom.getPaymentStatus() == 1) {
+                row.createCell(11).setCellValue("Thành công");
+            } else if (bookingRoom.getPaymentStatus() == 2) {
+                row.createCell(11).setCellValue("Thành công");
+            } else {
+                row.createCell(11).setCellValue("Đã hủy");
+            }
+
+            CellStyle style = workbook.createCellStyle();
+            style.setWrapText(true);
+            style.setShrinkToFit(true);
+
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = row.getCell(i);
+                cell.setCellStyle(style);
+                sheet.autoSizeColumn(i);
+            }
         }
 
-        // Write the workbook to the response output stream
-        OutputStream outputStream = response.getOutputStream();
+        ServletOutputStream outputStream = response.getOutputStream();
         workbook.write(outputStream);
         workbook.close();
         outputStream.close();
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        workbook.write(baos);
+        byte[] bytes = baos.toByteArray();
+        workbook.close();
+        baos.close();
+
+        return bytes;
+    }
+
+    private CellStyle getTitleStyle(Workbook workbook) {
+        CellStyle titleStyle = workbook.createCellStyle();
+        Font font = workbook.createFont();
+        font.setFontHeightInPoints((short) 13);
+        font.setBold(true);
+        titleStyle.setFont(font);
+        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        titleStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        titleStyle.setWrapText(true); // Cho phép ô văn bản xuống dòng
+        return titleStyle;
     }
 
 }

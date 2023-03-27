@@ -56,8 +56,9 @@ public class CustomerController {
     @PutMapping("/update/{id}")
     public ResponseMessage update(@PathVariable Long id, @RequestBody Customer customer) {
         Optional<Customer> customerOptional = customerService.findById(id);
-        return customerOptional.map(site1 -> {
-            customer.setId(site1.getId());
+        return customerOptional.map(customer1 -> {
+            customer.setId(customer1.getId());
+            customer.setPassword(customer1.getPassword());
             customerService.save(customer);
             return new ResponseMessage(200, "Success", "", null);
         })

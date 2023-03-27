@@ -25,7 +25,7 @@ import java.util.Optional;
 public class TourServiceImpl implements TourService {
 
     private static final Path CURRENT_FOLDER = Paths.get(System.getProperty("user.dir"));
-    private static final String domain = "http://localhost:8080/";
+    private static final String domain = "http://192.168.1.6:8080/";
     @Autowired
     private TourRepository tourRepository;
 
@@ -57,10 +57,17 @@ public class TourServiceImpl implements TourService {
     public Tour save(Tour tour, MultipartFile[] images) throws IOException {
         LocalDateTime getExpirationDate =
                 Instant.ofEpochMilli(tour.getExpirationDateMls()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        LocalDateTime getStartDate =
+                Instant.ofEpochMilli(tour.getStartDateMls()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+        LocalDateTime getEndDate =
+                Instant.ofEpochMilli(tour.getEndDateMls()).atZone(ZoneId.systemDefault()).toLocalDateTime();
         tour.setExpirationDate(getExpirationDate);
+        tour.setExpirationDate(getStartDate);
+        tour.setExpirationDate(getEndDate);
         tour.setRemainingOfPeople(tour.getNumberOfPeople());
         Tour tour1 = tourRepository.save(tour);
         tour1.setCode(String.format("GN%06d", tour1.getId()));
+        tourRepository.save(tour1);
         for (MultipartFile image : images) {
             saveFile(tour1.getId(), image);
         }
@@ -89,9 +96,9 @@ public class TourServiceImpl implements TourService {
     }
 
     @Override
-    public Page<Tour> searchTourPage(Long siteId, String searchName, Long status, Long lengthStayId, Long suitableId, Long typeOfTour, Pageable pageable) {
+    public Page<Tour> searchTourPage(Long siteId, String searchName, Long status, List<Long> lengthStayIds, List<Long> suitableIds, List<Long> typeOfTours, Pageable pageable) {
 //        PageRequest page_req = new PageRequest(0, buildingId, Sort.Direction.DESC, "idNode");
-        return tourRepository.searchBookingRoomsPage(siteId, searchName, status, lengthStayId, suitableId, typeOfTour, pageable);
+        return tourRepository.searchTourPage(siteId, searchName, status, lengthStayIds, suitableIds, typeOfTours, pageable);
     }
 
     public void saveFile(Long id, MultipartFile image) throws IOException {

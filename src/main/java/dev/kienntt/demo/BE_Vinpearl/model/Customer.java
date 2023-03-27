@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.kienntt.demo.BE_Vinpearl.base.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;
@@ -29,6 +30,7 @@ public class Customer extends BaseEntity {
 
     private String fullName;
 
+//    @JsonIgnore
     private String password;
 
     private String nationality;

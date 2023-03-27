@@ -4,6 +4,7 @@ import dev.kienntt.demo.BE_Vinpearl.model.BookingRoom;
 import dev.kienntt.demo.BE_Vinpearl.model.Room;
 import dev.kienntt.demo.BE_Vinpearl.model.RoomType;
 import dev.kienntt.demo.BE_Vinpearl.repository.RoomRepository;
+import dev.kienntt.demo.BE_Vinpearl.repository.RoomTypeRepository;
 import dev.kienntt.demo.BE_Vinpearl.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,9 @@ public class RoomServiceImpl implements RoomService {
     @Autowired
     private RoomRepository roomRepository;
 
+    @Autowired
+    private RoomTypeRepository roomTypeRepository;
+
     @Override
     public List<Room> findAll() {
         return (List<Room>) roomRepository.findAll();
@@ -31,7 +35,12 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public Room save(Room room) {
+        Optional<RoomType> roomType = roomTypeRepository.findById(room.getRoomTypeId());
+        int numRooms = roomRepository.countRooms(room.getRoomTypeId());
         Room room1 =  roomRepository.save(room);
+        if (numRooms >= roomType.get().getNumberOfRooms()) {
+            throw new RuntimeException("Đã đạt tối đa số lượng phòng cho phép");
+        }
         room1.setNumberRoom(String.format("RM%3d", room1.getId()));
         return roomRepository.save(room1);
     }
@@ -51,8 +60,8 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public Page<Room> searchRoomPage(Long hotelId, Long roomType, Long bookingStart, Long bookingEnd, Pageable pageable) {
-        return roomRepository.searchRoomsPage(roomType, pageable);
+    public Page<Room> searchRoomPage(String name, String roomType, Long status, Pageable pageable) {
+        return roomRepository.searchRoomsPage(name, roomType, status, pageable);
     }
 
 //    @Override

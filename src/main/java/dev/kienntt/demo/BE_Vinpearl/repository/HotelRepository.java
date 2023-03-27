@@ -21,7 +21,8 @@ public interface HotelRepository extends PagingAndSortingRepository<Hotel, Long>
             "(:siteId is null or h.siteId = :siteId) and " +
             "(:name is null or h.name LIKE CONCAT('%',:name, '%')) and " +
             "(:phone is null or h.phone LIKE CONCAT('%',:phone, '%')) and " +
-            "(:totalRoom is null or h.totalRoom = :totalRoom)")
+            "(:totalRoom is null or h.totalRoom = :totalRoom)" +
+            "GROUP BY h.id, h.name")
     Page<Hotel> getListHotel(Long siteId, String name, Long totalRoom, String phone, Pageable pageable);
 
     @Query("select h from Hotel h WHERE " +

@@ -2,6 +2,7 @@ package dev.kienntt.demo.BE_Vinpearl.controller;
 
 import dev.kienntt.demo.BE_Vinpearl.domain.request.BookingRequest;
 import dev.kienntt.demo.BE_Vinpearl.domain.request.BookingRoomRequest;
+import dev.kienntt.demo.BE_Vinpearl.domain.request.SearchExportRequest;
 import dev.kienntt.demo.BE_Vinpearl.model.BookingRoom;
 import dev.kienntt.demo.BE_Vinpearl.base.ResponseMessage;
 import dev.kienntt.demo.BE_Vinpearl.model.BookingTour;
@@ -19,7 +20,9 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -56,9 +59,9 @@ public class BookingRoomController {
         return  new ResponseMessage(200, "OK", bookingRoom, null);
     }
 
-    @PutMapping("/check-payment-room-ok/{id}")
-    public ResponseMessage checkPaymentRoomOk(@PathVariable("id") Long id, @RequestBody BookingRoom bookingRoom) {
-        bookingRoomService.checkPaymentOk(id, bookingRoom);
+    @PutMapping("/check-payment-room-ok/{code}")
+    public ResponseMessage checkPaymentRoomOk(@PathVariable("code") String code, @RequestBody BookingRoom bookingRoom) {
+        bookingRoomService.checkPaymentOk(code, bookingRoom);
         return new ResponseMessage(200, "OK", "", null);
     }
 
@@ -69,9 +72,9 @@ public class BookingRoomController {
     }
 
     @GetMapping("/detail/{id}")
-    public ResponseEntity<List<BookingRoom>> getBookingByCustomer1(@PathVariable Long id) {
-        List<BookingRoom> list = bookingRoomService.findByCustomerId(id);
-        return ResponseEntity.ok().body(list);
+    public ResponseMessage getBookingByCustomer1(@PathVariable Long id) {
+        Optional<BookingRoom> bookingRoom = bookingRoomService.findById(id);
+        return new ResponseMessage(200, "OK", bookingRoom, null);
     }
 
     @PutMapping("/{id}/checkout")
@@ -87,13 +90,12 @@ public class BookingRoomController {
     }
 
     @GetMapping("/search")
-    public ResponseMessage searchRoomsPage(@RequestParam(required = false) Long customerId,
-                                           @RequestParam(required = false) String code,
+    public ResponseMessage searchRoomsPage(@RequestParam(required = false) String code,
                                             @RequestParam(required = false) Long status,
-                                            @RequestParam(required = false) Long startTime,
-                                           @RequestParam(required = false) Long endTime,
+                                            @RequestParam(required = false) String startDate,
+                                           @RequestParam(required = false) String endDate,
                                            Pageable pageable) {
-        Page<BookingRoom> list = bookingRoomService.searchBookingRoomsPage(customerId, code, status, startTime, endTime, pageable);
+        Page<BookingRoom> list = bookingRoomService.searchBookingRoomsPage(code, status, LocalDate.parse(startDate), LocalDate.parse(endDate), pageable);
         return new ResponseMessage(200, "Success", list, null);
     }
 
@@ -109,9 +111,19 @@ public class BookingRoomController {
         return ipAddress;
     }
 
-    @GetMapping("/export")
-    public void exportToExcel(HttpServletResponse response) throws IOException {
-        List<BookingRoom> bookingRooms = bookingRoomService.findAll();
-        bookingRoomService.exportToExcel(bookingRooms, response);
+    @PostMapping("/export")
+    public void exportToExcel(@RequestBody SearchExportRequest searchExportRequest, HttpServletResponse response) throws IOException {
+        List<BookingRoom> bookingRooms = bookingRoomService.searchExport(searchExportRequest);
+//        bookingRoomService.exportToExcel(bookingRooms, response);
+        byte[] excelBytes = bookingRoomService.exportToExcel(bookingRooms, searchExportRequest.getStartDate(), searchExportRequest.getEndDate(), response);
+        // Đặt header "Content-Disposition" để tệp trả về được đặt tên và thông báo là một tệp Excel
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment; filename=booking-rooms.xls");
+
+        // Ghi dữ liệu tệp Excel vào response
+        OutputStream outputStream = response.getOutputStream();
+        outputStream.write(excelBytes);
+        outputStream.flush();
+        outputStream.close();
     }
 }

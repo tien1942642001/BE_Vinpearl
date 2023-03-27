@@ -128,12 +128,11 @@ public class RoomController {
 //    }
 
     @GetMapping("/search")
-    public ResponseMessage searchRoomsPage(@RequestParam(required = false) Long hotelId,
-                                        @RequestParam(required = false) Long roomType,
-                                        @RequestParam(required = false) Long bookingStart,
-                                        @RequestParam(required = false) Long bookingEnd,
+    public ResponseMessage searchRoomsPage(@RequestParam(required = false) String name,
+                                        @RequestParam(required = false) String roomType,
+                                        @RequestParam(required = false) Long status,
                                         Pageable pageable) {
-        Page<Room> listRoom = roomService.searchRoomPage(hotelId, roomType, bookingStart, bookingEnd, pageable);
+        Page<Room> listRoom = roomService.searchRoomPage(name, roomType, status, pageable);
 //        return new ResponsePage(200, "Success",
 //                roomPage.getContent(),
 //                roomPage.getTotalElements(),
@@ -145,13 +144,18 @@ public class RoomController {
 
     @GetMapping("/room-type/search")
     public ResponseMessage searchRoomTypesPage( @RequestParam(required = false) Long numberPerson,
-                                                @RequestParam(required = false) Long hotelId,
+                                                @RequestParam(required = false) String hotelName,
                                              @RequestParam(required = false) Long acreage,
                                              @RequestParam(required = false) String name,
                                              Pageable pageable) {
 
-        Page<RoomType> listRoom = roomTypeService.searchRoomTypesPage(numberPerson, hotelId, acreage, name, pageable);
+        Page<RoomType> listRoom = roomTypeService.searchRoomTypesPage(numberPerson, hotelName, acreage, name, pageable);
         return new ResponseMessage(200, "Success", listRoom, null);
+    }
+
+    @GetMapping("/room-type/findByHotelId/{hotelId}")
+    public ResponseMessage findAllRoomType(@PathVariable Long hotelId) {
+        return new ResponseMessage(200, "Success", roomTypeService.findRoomTypeByHotelId(hotelId), null);
     }
 
     @GetMapping("/room-type/findAll")

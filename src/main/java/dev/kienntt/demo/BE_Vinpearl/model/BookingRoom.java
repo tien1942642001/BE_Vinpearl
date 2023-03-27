@@ -54,6 +54,9 @@ public class BookingRoom extends BaseEntity {
     @Column(name = "service_id")
     private Long serviceId;
 
+    @Column(name = "hotel_id")
+    private Long hotelId;
+
     @Transient
     private String ip;
 
@@ -71,4 +74,8 @@ public class BookingRoom extends BaseEntity {
     @ManyToOne()
     @JoinColumn(name = "service_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Service service;
+
+    @ManyToOne()
+    @JoinColumn(name = "hotel_id", nullable = false, insertable = false, updatable = false)
+    private Hotel hotel;
 }

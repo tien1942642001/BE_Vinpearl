@@ -2,10 +2,12 @@ package dev.kienntt.demo.BE_Vinpearl.controller;
 
 import dev.kienntt.demo.BE_Vinpearl.base.ResponseMessage;
 import dev.kienntt.demo.BE_Vinpearl.domain.request.BookingRoomRequest;
-import dev.kienntt.demo.BE_Vinpearl.model.BookingRoom;
-import dev.kienntt.demo.BE_Vinpearl.model.BookingTour;
-import dev.kienntt.demo.BE_Vinpearl.model.Customer;
-import dev.kienntt.demo.BE_Vinpearl.model.Tour;
+import dev.kienntt.demo.BE_Vinpearl.domain.request.SearchExportRequest;
+import dev.kienntt.demo.BE_Vinpearl.model.*;
+import dev.kienntt.demo.BE_Vinpearl.repository.BookingTourRepository;
+import dev.kienntt.demo.BE_Vinpearl.repository.CustomerRepository;
+import dev.kienntt.demo.BE_Vinpearl.repository.RoomRepository;
+import dev.kienntt.demo.BE_Vinpearl.repository.RoomTypeRepository;
 import dev.kienntt.demo.BE_Vinpearl.service.BookingTourService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,7 +16,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,6 +39,18 @@ public class BookingTourController {
     public ResponseMessage create(@RequestBody BookingTour bookingTour) {
         bookingTourService.save(bookingTour);
         return new ResponseMessage(200, "Đặt tour thành công", "", null);
+    }
+
+    @GetMapping("/findByPaymentCode/{id}")
+    public ResponseMessage findByPaymentCode(@PathVariable String id) {
+        BookingTour bookingTour = bookingTourService.findByPaymentCode(id);
+        return new ResponseMessage(200, "Success", bookingTour, null);
+    }
+
+    @PutMapping("/check-payment-tour-ok/{code}")
+    public ResponseMessage checkPaymentTourOk(@PathVariable("code") String code, @RequestBody BookingTour bookingTour) {
+        bookingTourService.checkPaymentOk(code, bookingTour);
+        return new ResponseMessage(200, "OK", "", null);
     }
 
     @PostMapping("/booking")
@@ -60,9 +79,9 @@ public class BookingTourController {
     }
 
     @GetMapping("/top-customers")
-    public ResponseEntity<List<Customer>> getTopCustomers() {
+    public ResponseMessage getTopCustomers() {
         List<Customer> topCustomers = bookingTourService.getTop5Customer();
-        return ResponseEntity.ok().body(topCustomers);
+        return new ResponseMessage(200, "Success", topCustomers, null);
     }
 
     @GetMapping("/")
@@ -92,5 +111,21 @@ public class BookingTourController {
 //            ipAddress = request.getLocalAddr();
         }
         return ipAddress;
+    }
+
+    @PostMapping("/export")
+    public void exportToExcel(@RequestBody SearchExportRequest searchExportRequest, HttpServletResponse response) throws IOException {
+        List<BookingTour> bookingTours = bookingTourService.searchExport(searchExportRequest);
+//        bookingRoomService.exportToExcel(bookingRooms, response);
+        byte[] excelBytes = bookingTourService.exportToExcel(bookingTours, searchExportRequest.getStartDate(), searchExportRequest.getEndDate(), response);
+        // Đặt header "Content-Disposition" để tệp trả về được đặt tên và thông báo là một tệp Excel
+        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-Disposition", "attachment; filename=booking-rooms.xls");
+
+        // Ghi dữ liệu tệp Excel vào response
+        OutputStream outputStream = response.getOutputStream();
+        outputStream.write(excelBytes);
+        outputStream.flush();
+        outputStream.close();
     }
 }

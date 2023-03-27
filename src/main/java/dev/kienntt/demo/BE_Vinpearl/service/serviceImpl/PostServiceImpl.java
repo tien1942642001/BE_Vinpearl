@@ -20,7 +20,7 @@ import java.util.Optional;
 @Service
 public class PostServiceImpl implements PostService {
     private static final Path CURRENT_FOLDER = Paths.get(System.getProperty("user.dir"));
-    private static final String domain = "http://localhost:8080/";
+    private static final String domain = "http://192.168.1.6:8080/";
     @Autowired
     private PostRepository postRepository;
 

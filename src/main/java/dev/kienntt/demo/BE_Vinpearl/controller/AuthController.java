@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.time.LocalDateTime;
 
 @RestController
+@CrossOrigin("*")
 @RequestMapping("/api/v1/user")
 public class AuthController {
 

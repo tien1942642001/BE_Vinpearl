@@ -78,8 +78,13 @@ public class RoomTypeServiceImpl implements RoomTypeService {
         }
     }
     @Override
-    public Page<RoomType> searchRoomTypesPage(Long numberPerson, Long hotelId, Long acreage, String name, Pageable pageable) {
+    public Page<RoomType> searchRoomTypesPage(Long numberPerson, String hotelName, Long acreage, String name, Pageable pageable) {
 //        return roomTypeRepository.searchRoomTypesPage(acreage, name, pageable);
-        return roomTypeRepository.searchRoomTypesPage(numberPerson, hotelId, acreage, name, pageable);
+        return roomTypeRepository.searchRoomTypesPage(numberPerson, hotelName, acreage, name, pageable);
+    }
+
+    @Override
+    public List<RoomType> findRoomTypeByHotelId(Long hotelId) {
+        return roomTypeRepository.findRoomTypeByHotelId(hotelId);
     }
 }
