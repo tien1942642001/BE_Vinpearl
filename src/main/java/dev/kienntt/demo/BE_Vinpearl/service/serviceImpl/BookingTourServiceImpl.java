@@ -4,27 +4,33 @@ import dev.kienntt.demo.BE_Vinpearl.config.VnPayConfig;
 import dev.kienntt.demo.BE_Vinpearl.config.VnPayUtils;
 import dev.kienntt.demo.BE_Vinpearl.domain.dto.RoomTypeMinDto;
 import dev.kienntt.demo.BE_Vinpearl.domain.request.BookingRoomRequest;
+import dev.kienntt.demo.BE_Vinpearl.domain.request.SearchExportRequest;
 import dev.kienntt.demo.BE_Vinpearl.model.*;
-import dev.kienntt.demo.BE_Vinpearl.repository.BookingTourRepository;
-import dev.kienntt.demo.BE_Vinpearl.repository.CustomerRepository;
-import dev.kienntt.demo.BE_Vinpearl.repository.RoomRepository;
-import dev.kienntt.demo.BE_Vinpearl.repository.RoomTypeRepository;
+import dev.kienntt.demo.BE_Vinpearl.repository.*;
 import dev.kienntt.demo.BE_Vinpearl.service.BookingTourService;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import javax.transaction.Transactional;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AccessDeniedException;
 import java.sql.Date;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,6 +58,8 @@ public class BookingTourServiceImpl implements BookingTourService {
 
     @Autowired
     private RoomRepository roomRepository;
+    @Autowired
+    private TourRepository tourRepository;
 
     @Override
     public Iterable findAll() {
@@ -79,8 +87,8 @@ public class BookingTourServiceImpl implements BookingTourService {
     }
 
     public List<Customer> getTop5Customer() {
-        Date startDate = Date.valueOf(LocalDate.now().withDayOfYear(1)); // ngày đầu tiên của năm hiện tại
-        Date endDate = Date.valueOf(LocalDate.now().withDayOfYear(1).plusYears(1)); // ngày cuối cùng của năm hiện tại
+        LocalDateTime startDate = LocalDateTime.now().withDayOfYear(1); // ngày đầu tiên của năm hiện tại
+        LocalDateTime endDate = LocalDateTime.now().withDayOfYear(1).plusYears(1); // ngày cuối cùng của năm hiện tại
 
         List<BookingTour> bookingTours = bookingTourRepository.findByBookingDateBetween(startDate, endDate);
         Map<Long, Integer> bookingCountMap = new HashMap<>();
@@ -151,6 +159,11 @@ public class BookingTourServiceImpl implements BookingTourService {
     }
 
     @Override
+    public BookingTour findByPaymentCode(String paymentCode) {
+        return bookingTourRepository.findByPaymentCode(paymentCode);
+    }
+
+    @Override
     public Page<BookingTour> searchBookingTour(Long customerId, String code, Long stauts, Long startTime, Long endTime, Pageable pageable) {
 //        PageRequest page_req = new PageRequest(0, buildingId, Sort.Direction.DESC, "idNode");
         return bookingTourRepository.searchBookingTour(customerId, code, stauts, startTime, endTime, pageable);
@@ -160,25 +173,21 @@ public class BookingTourServiceImpl implements BookingTourService {
     public BookingTour saveBookingTour(BookingTour bookingTour) throws UnsupportedEncodingException {
         RoomTypeMinDto roomType = roomTypeRepository.findRoomTypeByMinPrice(bookingTour.getHotelId());
         Long roomTypeId = roomType.getId();
-        RoomType roomType1 = roomTypeRepository.findById(roomTypeId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy loại phòng."));
-
+        Optional<Tour> tour = tourRepository.findById(bookingTour.getTourId());
         Long customerId = bookingTour.getCustomerId();
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
 
-        // Kiểm tra số phòng còn lại trong loại phòng
-        if (roomType1.getRemainingOfRooms() <= 0) {
-            new RuntimeException("Đã hết phòng");
-        }
-
-        List<Room> availableRooms = roomRepository.findByRoomTypeId(roomTypeId, 0);
+        List<Room> availableRooms = roomRepository.findRoomTourEmpty(roomTypeId, 0L, tour.get().getStartDate(), tour.get().getEndDate());
+//        List<Room> availableRooms = roomRepository.findByRoomGroupType(roomTypeId, 0L);
         if (availableRooms.isEmpty()) {
-            new RuntimeException("No room available");
+            throw new RuntimeException("Phòng trong khách sạn đã hết, vui lòng chọn khách sạn khác");
         }
 
         Room roomRandom =  getRandomAvailableRoom(availableRooms);
         String paymentDate = new SimpleDateFormat("yyyyMMddHHmmss").format(new java.util.Date());
+
+        String paymentCode = "Tour" + UUID.randomUUID().toString().replace("-", "");
         // Tạo mới đối tượng BookingRoom và lưu vào database
         BookingTour bookingTour1 = new BookingTour();
         bookingTour1.setRoomId(roomRandom.getId());
@@ -191,6 +200,7 @@ public class BookingTourServiceImpl implements BookingTourService {
         bookingTour1.setNumberAdult(bookingTour.getNumberAdult());
         bookingTour1.setNumberChildren(bookingTour.getNumberChildren());
         bookingTour1.setPaymentStatus(0L);
+        bookingTour1.setPaymentCode(paymentCode);
 
         BookingTour bookingTour2 = bookingTourRepository.save(bookingTour1);
 
@@ -204,6 +214,39 @@ public class BookingTourServiceImpl implements BookingTourService {
         bookingTour2.setUrl(paymentUrl);
 
         return bookingTour2;
+    }
+
+    @Override
+    @Transactional
+    public BookingTour checkPaymentOk(String code, BookingTour bookingTourDetails) {
+        // Code to book hotel
+        BookingTour bookingTour = bookingTourRepository.findByPaymentCode(code);
+
+        Long roomId = bookingTourDetails.getRoomId();
+        Room room = roomRepository.findById(roomId)
+                .orElseThrow(() -> new RuntimeException("Room ID cannot be null."));
+
+        Long customerId = bookingTourDetails.getCustomerId();
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Customer ID cannot be null."));
+
+        bookingTour.setPaymentStatus(1L);
+        bookingTourRepository.save(bookingTour);
+//        if (bookingRoomDetails.getPaymentStatus() == 2) {
+        room.getRoomTypes().setRemainingOfRooms(room.getRoomTypes().getRemainingOfRooms() - 1);
+        room.setStatus(1L);
+        roomRepository.save(room);
+
+        Optional<RoomType> roomType = roomTypeRepository.findById(room.getRoomTypeId());
+        roomTypeRepository.updateRemainingOfRooms(room.getRoomTypeId(), roomType.get().getRemainingOfRooms() - 1);
+
+        Optional<Tour> tour = tourRepository.findById(bookingTour.getTourId());
+        tourRepository.updateRemainingOfTour(bookingTour.getTourId(), tour.get().getRemainingOfPeople() - bookingTour.getNumberChildren() - bookingTour.getNumberAdult());
+
+//        }
+
+//        bookingRoom.setService(bookingRoomDetails.getService());
+        return bookingTourRepository.save(bookingTour);
     }
 
     public String createPaymentUrl(BookingTour bookingTour) throws UnsupportedEncodingException {
@@ -229,7 +272,7 @@ public class BookingTourServiceImpl implements BookingTourService {
         vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
         vnp_Params.put("vnp_Amount", String.valueOf(vnp_Amount));
         vnp_Params.put("vnp_CurrCode", vnp_CurrCode);
-        vnp_Params.put("vnp_TxnRef", UUID.randomUUID().toString().replace("-", ""));
+        vnp_Params.put("vnp_TxnRef", bookingTour.getPaymentCode());
         vnp_Params.put("vnp_OrderInfo", vnp_OrderInfo);
         vnp_Params.put("vnp_OrderType", "other");
         vnp_Params.put("vnp_ReturnUrl", vnp_Returnurl);
@@ -280,5 +323,144 @@ public class BookingTourServiceImpl implements BookingTourService {
 
         int randomIndex = new Random().nextInt(availableRooms.size());
         return availableRooms.get(randomIndex);
+    }
+
+    @Override
+    public List<BookingTour> searchExport(SearchExportRequest searchExportRequest) {
+        LocalDateTime startDateTime = searchExportRequest.getStartDate().atStartOfDay();
+        LocalDateTime endDateTime = searchExportRequest.getEndDate().atTime(LocalTime.MAX);
+        return bookingTourRepository.searchExport(startDateTime, endDateTime, searchExportRequest.getStatus());
+    }
+
+    @Override
+    public byte[] exportToExcel(List<BookingTour> bookingTours, LocalDate startDate, LocalDate endDate, HttpServletResponse response) throws IOException {
+        // Set the headers for the response
+        response.setContentType("application/octet-stream");
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=booking_report_" + LocalDate.now() + ".xlsx";
+        response.setHeader(headerKey, headerValue);
+
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Booking Report");
+
+        int firstMovedIndex = 0;
+        int lastMovedIndex = 5;
+        int moveRowCount = 1;
+        sheet.shiftRows(firstMovedIndex, lastMovedIndex, moveRowCount, true, false);
+
+        // Create the header row
+        String[] headers = {"Mã đơn hàng", "Tên khách hàng", "Email", "Số điện thoại", "Ngày bắt đầu", "Ngày kết thúc", "Phòng", "Loại phòng", "Ngày chuyển khoản", "Số tiền", "Trạng thái"};
+        Row headerRow = sheet.createRow(6);
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers[i]);
+            sheet.autoSizeColumn(i);
+        }
+
+        // Tạo tiêu đề báo cáo
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String startDateStr = formatter.format(startDate);
+        String endDateStr = formatter.format(endDate);
+
+        String title = "Báo cáo từ ngày " + startDateStr + " tới ngày " + endDateStr;
+        Row titleRow = sheet.createRow(0);
+        Cell titleCell = titleRow.createCell(0);
+        titleCell.setCellValue(title);
+        titleCell.setCellStyle(getTitleStyle(workbook));
+
+        // Merge rows 2 to 6
+        CellRangeAddress mergedRegion = new CellRangeAddress(0, 4, 0, headers.length - 1);
+        sheet.addMergedRegion(mergedRegion);
+
+        // Tạo đối tượng font và set độ lớn font chữ và kiểu in nghiêng cho startDateStr
+        Font font = workbook.createFont();
+        font.setFontHeightInPoints((short)24);
+        font.setItalic(true);
+        font.setBold(true);
+
+// Canh giữa tiêu đề báo cáo
+        CellStyle titleStyle = getTitleStyle(workbook);
+        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        titleCell.setCellStyle(titleStyle);
+        titleStyle.setFont(font);
+
+// Add the booking data to the sheet
+        int rowNum = 8;
+        for (BookingTour bookingTour : bookingTours) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(bookingTour.getCode());
+            row.createCell(1).setCellValue(bookingTour.getCustomer().getFullName());
+            row.createCell(2).setCellValue(bookingTour.getCustomer().getEmail());
+            row.createCell(3).setCellValue(bookingTour.getCustomer().getPhone());
+
+            DateTimeFormatter formatterCheckIn = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+            String formattedTourStartDate = bookingTour.getTour().getStartDate().format(formatterCheckIn);
+
+            row.createCell(4).setCellValue(formattedTourStartDate);
+
+            DateTimeFormatter formatterCheckOut = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+            String formattedTourEndDate = bookingTour.getTour().getEndDate().format(formatterCheckOut);
+
+            row.createCell(5).setCellValue(formattedTourEndDate);
+
+            row.createCell(6).setCellValue(bookingTour.getRoom().getNumberRoom());
+            row.createCell(7).setCellValue(bookingTour.getRoom().getRoomTypes().getName());
+
+            DateTimeFormatter formatterPaymentDate = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+            String formattedPaymentDate = bookingTour.getPaymentDate().format(formatterPaymentDate);
+
+            row.createCell(8).setCellValue(formattedPaymentDate);
+
+
+            DecimalFormat decimalFormat = new DecimalFormat("#,##0");
+            String formattedPrice = decimalFormat.format(bookingTour.getPaymentAmount());
+            String formattedPriceWithDot = formattedPrice.replace(",", ".");
+            row.createCell(9).setCellValue(formattedPriceWithDot + " VNĐ");
+
+            if (bookingTour.getPaymentStatus() == 0) {
+                row.createCell(10).setCellValue("Đã hủy");
+            } else if (bookingTour.getPaymentStatus() == 1) {
+                row.createCell(10).setCellValue("Thành công");
+            } else if (bookingTour.getPaymentStatus() == 2) {
+                row.createCell(10).setCellValue("Thành công");
+            } else {
+                row.createCell(10).setCellValue("Đã hủy");
+            }
+
+            CellStyle style = workbook.createCellStyle();
+            style.setWrapText(true);
+            style.setShrinkToFit(true);
+
+            for (int i = 0; i < headers.length; i++) {
+                Cell cell = row.getCell(i);
+                cell.setCellStyle(style);
+                sheet.autoSizeColumn(i);
+            }
+        }
+
+        ServletOutputStream outputStream = response.getOutputStream();
+        workbook.write(outputStream);
+        workbook.close();
+        outputStream.close();
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        workbook.write(baos);
+        byte[] bytes = baos.toByteArray();
+        workbook.close();
+        baos.close();
+
+        return bytes;
+    }
+
+    private CellStyle getTitleStyle(Workbook workbook) {
+        CellStyle titleStyle = workbook.createCellStyle();
+        Font font = workbook.createFont();
+        font.setFontHeightInPoints((short) 13);
+        font.setBold(true);
+        titleStyle.setFont(font);
+        titleStyle.setAlignment(HorizontalAlignment.CENTER);
+        titleStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        titleStyle.setWrapText(true); // Cho phép ô văn bản xuống dòng
+        return titleStyle;
     }
 }

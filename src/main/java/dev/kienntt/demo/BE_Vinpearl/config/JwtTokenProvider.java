@@ -48,8 +48,8 @@ public class JwtTokenProvider {
                 .setSubject(customer.getEmail())
                 .setId(UUID.randomUUID().toString())
                 .setIssuedAt(Date.from(now))
-//                .setExpiration(Date.from(now.plus(1l, ChronoUnit.MINUTES)))
-                .setExpiration(Date.from(now.plus(30, ChronoUnit.DAYS)))
+                .setExpiration(Date.from(now.plus(20l, ChronoUnit.MINUTES)))
+//                .setExpiration(Date.from(now.plus(30, ChronoUnit.DAYS)))
                 .signWith(privateKey)
                 .compact();
 

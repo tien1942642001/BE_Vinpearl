@@ -19,5 +19,5 @@ public interface RoomService {
 
     Iterable<Room> searchRoom(Long roomType);
 
-    Page<Room> searchRoomPage(Long hotelId, Long roomType, Long bookingStart, Long bookingEnd, Pageable pageable);
+    Page<Room> searchRoomPage(String name, String roomType, Long status, Pageable pageable);
 }

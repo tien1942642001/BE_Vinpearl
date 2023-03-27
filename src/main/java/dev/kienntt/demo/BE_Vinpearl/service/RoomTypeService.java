@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 public interface RoomTypeService {
@@ -20,6 +21,8 @@ public interface RoomTypeService {
 
     void deleteRoomType(Long id);
 
-    Page<RoomType> searchRoomTypesPage(Long numberPerson, Long hotelId, Long acreage, String name, Pageable pageable);
+    Page<RoomType> searchRoomTypesPage(Long numberPerson, String hotelName, Long acreage, String name, Pageable pageable);
+
+    List<RoomType> findRoomTypeByHotelId(Long hotelId);
 
 }

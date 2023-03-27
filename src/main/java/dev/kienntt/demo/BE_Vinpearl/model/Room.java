@@ -42,5 +42,11 @@ public class Room extends BaseEntity {
     private RoomType roomTypes;
 
     @Column(name = "status")
-    private Integer status;
+    private Long status;
+
+    @OneToMany(mappedBy = "roomId", fetch = FetchType.EAGER)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @JsonIgnore
+    private List<BookingRoom> bookingRoom;
 }

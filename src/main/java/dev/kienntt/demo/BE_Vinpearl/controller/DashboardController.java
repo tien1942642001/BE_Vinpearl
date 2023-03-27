@@ -4,10 +4,12 @@ import dev.kienntt.demo.BE_Vinpearl.base.ResponseMessage;
 import dev.kienntt.demo.BE_Vinpearl.service.BookingRoomService;
 import dev.kienntt.demo.BE_Vinpearl.service.BookingTicketService;
 import dev.kienntt.demo.BE_Vinpearl.service.BookingTourService;
+import dev.kienntt.demo.BE_Vinpearl.service.DashboardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -22,6 +24,14 @@ public class DashboardController {
 
     @Autowired
     private BookingTicketService bookingTicketService;
+
+    @Autowired
+    private DashboardService dashboardService;
+
+    @GetMapping("/total")
+    public ResponseMessage getTotal() {
+        return new ResponseMessage(200, "Success", dashboardService.getTotal(), null);
+    }
 
     @GetMapping("/booking-room")
     public ResponseMessage findBookingRoom(@RequestParam Long startMonth,@RequestParam Long endMonth) {

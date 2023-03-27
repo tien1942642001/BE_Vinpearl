@@ -37,12 +37,23 @@ public class User extends BaseEntity {
     @Column(name = "hotel_id")
     private Long hotelId;
 
+    @Column(name = "site_id")
+    private Long siteId;
+
     @Column(name = "role_id")
     private Long roleId;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "role_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Role role;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "hotel_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private Hotel hotel;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "site_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private Site site;
 
     @Column(name = "token")
     private String token;

@@ -55,4 +55,9 @@ public class RoomType extends BaseEntity {
     @ToString.Exclude
     @JsonIgnoreProperties("roomType")
     private Set<Service> service;
+
+    @ManyToOne
+    @JoinColumn(name="hotel_id", nullable=false, insertable = false, updatable = false)
+    @JsonIgnore
+    private Hotel hotel;
 }

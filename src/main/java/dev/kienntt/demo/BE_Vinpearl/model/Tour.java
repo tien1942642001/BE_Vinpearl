@@ -66,6 +66,12 @@ public class Tour extends BaseEntity {
     @Column(name = "expiration_date")
     private LocalDateTime expirationDate;
 
+    @Column(name = "start_date")
+    private LocalDateTime startDate;
+
+    @Column(name = "end_date")
+    private LocalDateTime endDate;
+
     @Column(name = "number_of_people")
     private Long numberOfPeople;
 
@@ -74,6 +80,12 @@ public class Tour extends BaseEntity {
 
     @Transient
     private Long expirationDateMls;
+
+    @Transient
+    private Long startDateMls;
+
+    @Transient
+    private Long endDateMls;
 
     @Transient
     private Long priceAdult;

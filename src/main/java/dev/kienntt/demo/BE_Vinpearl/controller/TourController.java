@@ -51,6 +51,8 @@ public class TourController {
                                       @RequestParam Long priceChildren,
                                       @RequestParam Long numberOfPeople,
                                       @RequestParam Long expirationDateMls,
+                                      @RequestParam Long startDateMls,
+                                      @RequestParam Long endDateMls,
                                        @RequestParam MultipartFile[] images) throws IOException {
         Tour tour = new Tour();
         tour.setCreatedDate(localDateTime.toString());
@@ -65,6 +67,8 @@ public class TourController {
         tour.setTypeOfTourId(typeOfTourId);
         tour.setNumberOfPeople(numberOfPeople);
         tour.setExpirationDateMls(expirationDateMls);
+        tour.setStartDateMls(startDateMls);
+        tour.setEndDateMls(endDateMls);
         tour.setPriceAdult(priceAdult);
         tour.setPriceChildren(priceChildren);
         tourService.save(tour, images);
@@ -124,11 +128,11 @@ public class TourController {
     public ResponseMessage searchTour(@RequestParam(required = false) Long siteId,
                                       @RequestParam(required = false) String searchName,
                                       @RequestParam(required = false) Long status,
-                                      @RequestParam(required = false) Long lengthStayId,
-                                      @RequestParam(required = false) Long suitableId,
-                                      @RequestParam(required = false) Long typeOfTour,
+                                      @RequestParam(required = false) List<Long> lengthStayIds,
+                                      @RequestParam(required = false) List<Long> suitableIds,
+                                      @RequestParam(required = false) List<Long> typeOfTours,
                                             Pageable pageable) {
-        Page<Tour> listTour = tourService.searchTourPage(siteId, searchName, status, lengthStayId, suitableId, typeOfTour, pageable);
+        Page<Tour> listTour = tourService.searchTourPage(siteId, searchName, status, lengthStayIds, suitableIds, typeOfTours, pageable);
         return new ResponseMessage(200, "Success", listTour, null);
     }
 }

@@ -9,13 +9,14 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface BookingTourRepository extends PagingAndSortingRepository<BookingTour, Long> {
-    @Query("SELECT b FROM BookingTour b WHERE b.createdDate BETWEEN :startDate AND :endDate")
-    List<BookingTour> findByBookingDateBetween(Date startDate, Date endDate);
+    @Query("SELECT b FROM BookingTour b WHERE b.paymentDate BETWEEN :startDate AND :endDate")
+    List<BookingTour> findByBookingDateBetween(LocalDateTime startDate, LocalDateTime endDate);
 
     @Query("SELECT b FROM BookingTour b")
     List<BookingTour> findAllBookingTour();
@@ -23,11 +24,18 @@ public interface BookingTourRepository extends PagingAndSortingRepository<Bookin
     @Query("SELECT b FROM BookingTour b where b.customerId = :id")
     List<BookingTour> findByCustomerId(Long id);
 
-    @Query("SELECT b FROM BookingRoom b WHERE " +
+    @Query("SELECT b FROM BookingTour b WHERE " +
             "(:customerId is null or b.customerId = :customerId) and " +
             "(:status is null or b.paymentStatus = :status) and " +
             "(:code is null or b.code LIKE CONCAT('%',:code, '%')) and " +
-            "(:startTime is null or b.checkIn >= :startTime) and (:endTime is null or b.checkOut <= :endTime)")
+            "(:startTime is null or :endTime is null or b.paymentDate between :startTime and :endTime)")
     Page<BookingTour> searchBookingTour(Long customerId, String code, Long status, Long startTime, Long endTime, Pageable pageable);
 
+    @Query("SELECT b FROM BookingTour b where b.paymentCode = :paymentCode")
+    BookingTour findByPaymentCode(String paymentCode);
+
+    @Query("SELECT b FROM BookingTour b where " +
+            "(:status is null or b.paymentStatus = :status) and " +
+            "(:startDate is null or :endDate is null or b.paymentDate between :startDate and :endDate)")
+    List<BookingTour> searchExport(LocalDateTime startDate,LocalDateTime endDate, Long status);
 }
