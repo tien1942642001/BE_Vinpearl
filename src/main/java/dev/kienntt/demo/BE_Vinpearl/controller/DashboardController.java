@@ -1,10 +1,8 @@
 package dev.kienntt.demo.BE_Vinpearl.controller;
 
 import dev.kienntt.demo.BE_Vinpearl.base.ResponseMessage;
-import dev.kienntt.demo.BE_Vinpearl.service.BookingRoomService;
-import dev.kienntt.demo.BE_Vinpearl.service.BookingTicketService;
-import dev.kienntt.demo.BE_Vinpearl.service.BookingTourService;
-import dev.kienntt.demo.BE_Vinpearl.service.DashboardService;
+import dev.kienntt.demo.BE_Vinpearl.domain.dto.CustomerTop5Dto;
+import dev.kienntt.demo.BE_Vinpearl.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -27,6 +25,9 @@ public class DashboardController {
 
     @Autowired
     private DashboardService dashboardService;
+
+    @Autowired
+    private CustomerService customerService;
 
     @GetMapping("/total")
     public ResponseMessage getTotal() {
@@ -51,9 +52,9 @@ public class DashboardController {
     }
 
     @GetMapping("/getTop5Customer")
-    public ResponseEntity<Map<String, Long>> getTop5Customer() {
-        Map<String, Long> test = bookingTourService.getBookingTourCountByMonth();
-        return ResponseEntity.ok().body(test);
+    public ResponseMessage getTop5Customer() {
+        List<CustomerTop5Dto> list = customerService.getTop5();
+        return new ResponseMessage(200, "Success", list, null);
     }
 
 //    thống kê số người đặt phòng theo tháng

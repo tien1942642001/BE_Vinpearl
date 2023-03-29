@@ -40,7 +40,8 @@ public class HotelController {
                                        @RequestParam String phone,
                                        @RequestParam Long totalRoom,
                                        @RequestParam Long siteId,
-                                            @RequestParam MultipartFile[] images) throws IOException {
+                                       @RequestParam(required = false) Long id,
+                                       @RequestParam MultipartFile[] images) throws IOException {
         Hotel hotel = new Hotel();
         hotel.setCreatedDate(localDateTime.toString());
         hotel.setCreatedBy(hotel.getCreator());
@@ -52,6 +53,9 @@ public class HotelController {
         hotel.setAcreage(acreage);
         hotel.setSiteId(siteId);
         hotel.setTotalRoom(totalRoom);
+        if (id != null) {
+            hotel.setId(id);
+        }
         hotelService.save(hotel, images);
         return new ResponseMessage(200, "Success", "", null);
     }
@@ -63,6 +67,9 @@ public class HotelController {
                                        @RequestParam String description,
                                        @RequestParam String address,
                                        @RequestParam Long acreage,
+                                       @RequestParam String phone,
+                                       @RequestParam Long totalRoom,
+                                       @RequestParam Long siteId,
                                        @RequestParam MultipartFile[] images) throws IOException {
         Optional<Hotel> hotel = hotelService.findById(Long.parseLong(id));
         hotel.get().setCreatedDate(localDateTime.toString());

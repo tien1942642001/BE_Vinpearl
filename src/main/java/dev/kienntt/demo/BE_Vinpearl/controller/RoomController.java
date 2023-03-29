@@ -71,19 +71,28 @@ public class RoomController {
         return new ResponseMessage(200, "Success", "", null);
     }
 
-    @PostMapping("/update")
-    public ResponseMessage updateRoom(@RequestBody Room room) {
-        room.setUpdatedDate(localDateTime.toString());
-        room.setCreatedBy(room.getCreator());
-        roomService.save(room);
-        return new ResponseMessage(200, "Success", room, null);
+    @PutMapping("/update/{id}")
+    public ResponseMessage updateRoom(@PathVariable Long id, @RequestBody Room room) {
+        Optional<Room> roomOptional = roomService.findById(id);
+        roomOptional.get().setUpdatedDate(localDateTime.toString());
+        return roomOptional.map(room1 -> {
+                    room.setId(room1.getId());
+                    roomService.save(room);
+                    return new ResponseMessage(200, "Success", "", null);
+                })
+                .orElseGet(() -> new ResponseMessage(404, "Error", null, "No result with query"));
     }
 
-    @PostMapping("/room-type/update")
-    public ResponseMessage updateRoomType(@RequestBody RoomType roomType) {
-        roomType.setUpdatedDate(localDateTime.toString());
-        roomTypeService.save(roomType);
-        return new ResponseMessage(200, "Success", roomType, null);
+    @PostMapping("/room-type/update/{id}")
+    public ResponseMessage updateRoomType(@PathVariable Long id, @RequestBody RoomType roomType) {
+        Optional<RoomType> roomTypeOptional = roomTypeService.findById(id);
+        roomTypeOptional.get().setUpdatedDate(localDateTime.toString());
+        return roomTypeOptional.map(roomType1 -> {
+                    roomType.setId(roomType1.getId());
+                    roomTypeService.save(roomType);
+                    return new ResponseMessage(200, "Success", "", null);
+                })
+                .orElseGet(() -> new ResponseMessage(404, "Error", null, "No result with query"));
     }
 
     @GetMapping("/detail/{id}")

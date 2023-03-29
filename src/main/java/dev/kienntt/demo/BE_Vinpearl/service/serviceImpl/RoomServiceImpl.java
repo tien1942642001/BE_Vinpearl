@@ -36,13 +36,16 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public Room save(Room room) {
         Optional<RoomType> roomType = roomTypeRepository.findById(room.getRoomTypeId());
-        int numRooms = roomRepository.countRooms(room.getRoomTypeId());
-        Room room1 =  roomRepository.save(room);
-        if (numRooms >= roomType.get().getNumberOfRooms()) {
-            throw new RuntimeException("Đã đạt tối đa số lượng phòng cho phép");
+        if (room.getId() == null) {
+            int numRooms = roomRepository.countRooms(room.getRoomTypeId());
+            Room room1 =  roomRepository.save(room);
+            if (numRooms >= roomType.get().getNumberOfRooms()) {
+                throw new RuntimeException("Đã đạt tối đa số lượng phòng cho phép");
+            }
+            room1.setNumberRoom(String.format("RM%3d", room1.getId()));
+            return roomRepository.save(room1);
         }
-        room1.setNumberRoom(String.format("RM%3d", room1.getId()));
-        return roomRepository.save(room1);
+        return  roomRepository.save(room);
     }
 
     @Override
