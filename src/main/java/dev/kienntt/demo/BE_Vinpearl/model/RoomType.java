@@ -58,6 +58,6 @@ public class RoomType extends BaseEntity {
 
     @ManyToOne
     @JoinColumn(name="hotel_id", nullable=false, insertable = false, updatable = false)
-    @JsonIgnore
+//    @JsonIgnore
     private Hotel hotel;
 }

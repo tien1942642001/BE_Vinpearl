@@ -10,16 +10,22 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public interface RoomTypeRepository extends PagingAndSortingRepository<RoomType, Long> {
-    @Query("SELECT r FROM RoomType r WHERE " +
-            "(:numberPerson is null or r.numberAdult + r.numberChildren >= :numberPerson) and " +
-            "(:hotelName is null or r.hotel.name LIKE CONCAT('%',:hotelName, '%')) and" +
-            "(:acreage is null or r.acreage = :acreage) and " +
-            "(:name is null or r.name LIKE CONCAT('%',:name, '%'))")
-    Page<RoomType> searchRoomTypesPage(Long numberPerson, String hotelName,Long acreage, String name, Pageable pageable);
+    @Query("SELECT rt FROM RoomType rt " +
+            "left join Room r on r.roomTypeId = rt.id " +
+            "left join Service s on s.roomTypeId = rt.id " +
+            "left join BookingRoom br on r.id = br.roomId WHERE " +
+            "(:numberPerson is null or rt.numberAdult + rt.numberChildren >= :numberPerson) and " +
+            "(:hotelName is null or rt.hotel.name LIKE CONCAT('%',:hotelName, '%')) and" +
+            "(:acreage is null or rt.acreage = :acreage) and " +
+            "(:startDate is null or :endDate is null or (br.checkIn > :endDate or br.checkOut < :startDate)) and " +
+            "(:name is null or r.name LIKE CONCAT('%',:name, '%')) " +
+            "group by rt.id")
+    Page<RoomType> searchRoomTypesPage(Long numberPerson, String hotelName, Long acreage, String name, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
     List<RoomType> findRoomTypeByHotelId(Long hotelId);
 
     @Query(value = "SELECT MIN(s.price) FROM Service s " +

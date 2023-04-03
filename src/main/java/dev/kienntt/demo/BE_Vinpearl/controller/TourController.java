@@ -37,7 +37,7 @@ public class TourController {
 //        return new ResponseMessage(200, "Tạo tour thành công", "", null);
 //    }
 
-    @PostMapping("/create")
+    @PostMapping("/save")
     public ResponseMessage createTour(@RequestParam String name,
                                        @RequestParam String description,
                                        @RequestParam String inclusion,
@@ -53,6 +53,7 @@ public class TourController {
                                       @RequestParam Long expirationDateMls,
                                       @RequestParam Long startDateMls,
                                       @RequestParam Long endDateMls,
+                                      @RequestParam(required = false) Long id,
                                        @RequestParam MultipartFile[] images) throws IOException {
         Tour tour = new Tour();
         tour.setCreatedDate(localDateTime.toString());
@@ -71,6 +72,9 @@ public class TourController {
         tour.setEndDateMls(endDateMls);
         tour.setPriceAdult(priceAdult);
         tour.setPriceChildren(priceChildren);
+        if (id != null) {
+            tour.setId(id);
+        }
         tourService.save(tour, images);
         return new ResponseMessage(200, "Success", "", null);
     }

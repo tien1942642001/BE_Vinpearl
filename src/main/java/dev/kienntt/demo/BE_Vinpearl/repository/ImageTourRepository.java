@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ImageTourRepository extends JpaRepository<ImageTour, Long> {
+    void deleteByTourId(Long tourId);
 }

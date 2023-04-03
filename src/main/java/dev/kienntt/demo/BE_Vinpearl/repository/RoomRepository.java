@@ -19,11 +19,12 @@ public interface RoomRepository extends PagingAndSortingRepository<Room, Long> {
             "(:roomType is null or r.roomTypeId = :roomType)")
     Iterable<Room> searchRooms(Long roomType);
 
-    @Query("SELECT r FROM Room r WHERE " +
+    @Query("SELECT r FROM Room r left join BookingRoom br on r.id = br.roomId WHERE " +
             "(:name is null or r.name LIKE CONCAT('%',:name, '%')) and " +
+            "(:startDate is null or :endDate is null or (br.checkIn > :endDate or br.checkOut < :startDate)) and " +
             "(:status is null or r.status = :status) and " +
             "(:roomType is null or r.roomTypes.name LIKE CONCAT('%',:roomType, '%'))")
-    Page<Room> searchRoomsPage(String name, String roomType, Long status, Pageable pageable);
+    Page<Room> searchRoomsPage(String name, String roomType, Long status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
     @Query("SELECT r FROM Room r WHERE " +
             "r.status = :status AND r.roomTypeId = :roomTypeId and r.roomGroupType = 0")
@@ -35,7 +36,7 @@ public interface RoomRepository extends PagingAndSortingRepository<Room, Long> {
 
     @Query("SELECT r FROM Room r WHERE " +
             "r.status = :status AND r.roomTypeId = :roomTypeId and r.roomGroupType = 0 AND r.id NOT IN " +
-            "(select b.roomId from BookingRoom b where b.checkIn between :startDate and :endDate OR (b.checkOut BETWEEN :startDate AND :endDate))")
+            "(select b.roomId from BookingRoom b where (b.checkIn between :startDate and :endDate) OR (b.checkOut BETWEEN :startDate AND :endDate))")
 //            "(SELECT b.room.id FROM Booking b WHERE (b.checkInDate BETWEEN :startDate AND :endDate) OR (b.checkOutDate BETWEEN :startDate AND :endDate))")
     List<Room> findRoomEmpty(Long roomTypeId, Long status, LocalDateTime startDate, LocalDateTime endDate);
 

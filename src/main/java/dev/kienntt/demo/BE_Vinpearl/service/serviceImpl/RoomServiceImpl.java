@@ -11,6 +11,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -63,8 +66,10 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public Page<Room> searchRoomPage(String name, String roomType, Long status, Pageable pageable) {
-        return roomRepository.searchRoomsPage(name, roomType, status, pageable);
+    public Page<Room> searchRoomPage(String name, String roomType, Long status, Long startTime, Long endTime, Pageable pageable) {
+        LocalDateTime startDate = startTime != null ? Instant.ofEpochMilli(startTime).atZone(ZoneId.systemDefault()).toLocalDateTime() : null;
+        LocalDateTime endDate = endTime != null ? Instant.ofEpochMilli(endTime).atZone(ZoneId.systemDefault()).toLocalDateTime() : null;
+        return roomRepository.searchRoomsPage(name, roomType, status, startDate, endDate, pageable);
     }
 
 //    @Override

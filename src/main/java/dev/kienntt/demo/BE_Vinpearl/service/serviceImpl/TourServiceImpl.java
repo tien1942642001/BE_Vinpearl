@@ -66,19 +66,32 @@ public class TourServiceImpl implements TourService {
         tour.setExpirationDate(getEndDate);
         tour.setRemainingOfPeople(tour.getNumberOfPeople());
         Tour tour1 = tourRepository.save(tour);
-        tour1.setCode(String.format("GN%06d", tour1.getId()));
-        tourRepository.save(tour1);
-        for (MultipartFile image : images) {
-            saveFile(tour1.getId(), image);
+        if (tour.getId() != null) {
+            // Xóa tất cả bản ghi ImageTour liên quan đến tour hiện tại
+            imageTourRepository.deleteByTourId(tour1.getId());
+
+            // Thêm các ảnh mới vào
+            for (MultipartFile image : images) {
+                saveFile(tour1.getId(), image);
+            }
+        } else {
+            tour1.setCode(String.format("GN%06d", tour1.getId()));
+            tourRepository.save(tour1);
+            for (MultipartFile image : images) {
+                saveFile(tour1.getId(), image);
+            }
         }
         List<Hotel> hotelList = hotelRepository.findBySiteId(tour.getLeavingToId());
         for (Hotel hotel : hotelList) {
             Long minPriceRoomType = roomTypeRepository.findMinPriceByRoomTypeName(hotel.getId()) != null ? roomTypeRepository.findMinPriceByRoomTypeName(hotel.getId()) : 0;
             Long priceAdultTourHotel = tour.getPriceAdult() + minPriceRoomType;
             Long priceChildrenTourHotel = tour.getPriceChildren() + minPriceRoomType;
-            TourHotel tourHotel = new TourHotel();
-            tourHotel.setTourId(tour1.getId());
-            tourHotel.setHotelId(hotel.getId());
+            TourHotel tourHotel = tourHotelRepository.findByTourIdAndHotelId(tour1.getId(), hotel.getId());
+            if (tourHotel == null) {
+                tourHotel = new TourHotel();
+                tourHotel.setTourId(tour1.getId());
+                tourHotel.setHotelId(hotel.getId());
+            }
             tourHotel.setPriceAdult(priceAdultTourHotel);
             tourHotel.setPriceChildren(priceChildrenTourHotel);
             tourHotelRepository.save(tourHotel);

@@ -140,8 +140,10 @@ public class RoomController {
     public ResponseMessage searchRoomsPage(@RequestParam(required = false) String name,
                                         @RequestParam(required = false) String roomType,
                                         @RequestParam(required = false) Long status,
+                                           @RequestParam(required = false) Long startTime,
+                                           @RequestParam(required = false) Long endTime,
                                         Pageable pageable) {
-        Page<Room> listRoom = roomService.searchRoomPage(name, roomType, status, pageable);
+        Page<Room> listRoom = roomService.searchRoomPage(name, roomType, status, startTime, endTime, pageable);
 //        return new ResponsePage(200, "Success",
 //                roomPage.getContent(),
 //                roomPage.getTotalElements(),
@@ -156,9 +158,11 @@ public class RoomController {
                                                 @RequestParam(required = false) String hotelName,
                                              @RequestParam(required = false) Long acreage,
                                              @RequestParam(required = false) String name,
+                                                @RequestParam(required = false) Long startTime,
+                                                @RequestParam(required = false) Long endTime,
                                              Pageable pageable) {
 
-        Page<RoomType> listRoom = roomTypeService.searchRoomTypesPage(numberPerson, hotelName, acreage, name, pageable);
+        Page<RoomType> listRoom = roomTypeService.searchRoomTypesPage(numberPerson, hotelName, acreage, name, startTime, endTime, pageable);
         return new ResponseMessage(200, "Success", listRoom, null);
     }
 

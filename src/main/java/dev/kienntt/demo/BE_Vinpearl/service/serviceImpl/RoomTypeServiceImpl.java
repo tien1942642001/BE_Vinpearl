@@ -15,6 +15,9 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,9 +81,10 @@ public class RoomTypeServiceImpl implements RoomTypeService {
         }
     }
     @Override
-    public Page<RoomType> searchRoomTypesPage(Long numberPerson, String hotelName, Long acreage, String name, Pageable pageable) {
-//        return roomTypeRepository.searchRoomTypesPage(acreage, name, pageable);
-        return roomTypeRepository.searchRoomTypesPage(numberPerson, hotelName, acreage, name, pageable);
+    public Page<RoomType> searchRoomTypesPage(Long numberPerson, String hotelName, Long acreage, String name, Long startTime, Long endTime, Pageable pageable) {
+        LocalDateTime startDate = startTime != null ? Instant.ofEpochMilli(startTime).atZone(ZoneId.systemDefault()).toLocalDateTime() : null;
+        LocalDateTime endDate = endTime != null ? Instant.ofEpochMilli(endTime).atZone(ZoneId.systemDefault()).toLocalDateTime() : null;
+        return roomTypeRepository.searchRoomTypesPage(numberPerson, hotelName, acreage, name, startDate, endDate, pageable);
     }
 
     @Override
