@@ -24,6 +24,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -92,10 +93,12 @@ public class BookingRoomController {
     @GetMapping("/search")
     public ResponseMessage searchRoomsPage(@RequestParam(required = false) String code,
                                             @RequestParam(required = false) Long status,
-                                            @RequestParam(required = false) String startDate,
-                                           @RequestParam(required = false) String endDate,
+                                            @RequestParam(required = false) Long startTime,
+                                           @RequestParam(required = false) Long endTime,
+                                           @RequestParam(required = false) Long customerId,
                                            Pageable pageable) {
-        Page<BookingRoom> list = bookingRoomService.searchBookingRoomsPage(code, status, LocalDate.parse(startDate), LocalDate.parse(endDate), pageable);
+
+        Page<BookingRoom> list = bookingRoomService.searchBookingRoomsPage(customerId, code, status, startTime, endTime, pageable);
         return new ResponseMessage(200, "Success", list, null);
     }
 

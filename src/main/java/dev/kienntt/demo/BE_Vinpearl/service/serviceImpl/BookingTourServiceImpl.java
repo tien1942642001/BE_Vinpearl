@@ -26,7 +26,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
-import java.sql.Date;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.time.*;
@@ -64,6 +63,11 @@ public class BookingTourServiceImpl implements BookingTourService {
     @Override
     public Iterable findAll() {
         return bookingTourRepository.findAll();
+    }
+
+    @Override
+    public List<BookingTour> getAllBookingTours() {
+        return bookingTourRepository.findAllBookingTour();
     }
 
     @Override
@@ -166,7 +170,11 @@ public class BookingTourServiceImpl implements BookingTourService {
     @Override
     public Page<BookingTour> searchBookingTour(Long customerId, String code, Long stauts, Long startTime, Long endTime, Pageable pageable) {
 //        PageRequest page_req = new PageRequest(0, buildingId, Sort.Direction.DESC, "idNode");
-        return bookingTourRepository.searchBookingTour(customerId, code, stauts, startTime, endTime, pageable);
+        LocalDateTime startDate = startTime != null ? LocalDateTime.ofInstant(Instant.ofEpochMilli(startTime),
+                TimeZone.getDefault().toZoneId()) : null;
+        LocalDateTime endDate = startTime != null ? LocalDateTime.ofInstant(Instant.ofEpochMilli(endTime),
+                TimeZone.getDefault().toZoneId()) : null;
+        return bookingTourRepository.searchBookingTour(customerId, code, stauts, startDate, endDate, pageable);
     }
 
     @Override
@@ -185,7 +193,7 @@ public class BookingTourServiceImpl implements BookingTourService {
         }
 
         Room roomRandom =  getRandomAvailableRoom(availableRooms);
-        String paymentDate = new SimpleDateFormat("yyyyMMddHHmmss").format(new java.util.Date());
+        LocalDateTime paymentDate = LocalDateTime.now();
 
         String paymentCode = "Tour" + UUID.randomUUID().toString().replace("-", "");
         // Tạo mới đối tượng BookingRoom và lưu vào database
@@ -195,7 +203,7 @@ public class BookingTourServiceImpl implements BookingTourService {
         bookingTour1.setHotelId(bookingTour.getHotelId());
         bookingTour1.setTourId(bookingTour.getTourId());
         bookingTour1.setPaymentAmount(bookingTour.getPaymentAmount());
-        bookingTour1.setPaymentDate(bookingTour.getPaymentDate());
+        bookingTour1.setPaymentDate(paymentDate);
         bookingTour1.setDescription(bookingTour.getDescription());
         bookingTour1.setNumberAdult(bookingTour.getNumberAdult());
         bookingTour1.setNumberChildren(bookingTour.getNumberChildren());
@@ -263,7 +271,8 @@ public class BookingTourServiceImpl implements BookingTourService {
         String vnp_IpAddr = "192.168.100.3";
         String vnp_CurrCode = "VND";
         String vnp_Locale = "vn";
-        String vnp_TxnTime = new SimpleDateFormat("yyyyMMddHHmmss").format(new java.util.Date());
+        Date date = Date.from(bookingTour.getPaymentDate().atZone(ZoneId.systemDefault()).toInstant());
+        String vnp_TxnTime = new SimpleDateFormat("yyyyMMddHHmmss").format(date);
 
         Map<String, String> vnp_Params = new HashMap<>();
         vnp_Params.put("vnp_Version", vnp_Version);

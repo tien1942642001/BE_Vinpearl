@@ -21,6 +21,8 @@ import java.util.Optional;
 public interface BookingTourService {
     Iterable findAll();
 
+    List<BookingTour> getAllBookingTours();
+
     Optional findById(Long id);
 
     List<BookingTour> findByCustomerId(Long id);

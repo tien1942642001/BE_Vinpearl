@@ -197,10 +197,12 @@ public class BookingServiceImpl implements BookingRoomService {
     }
 
     @Override
-    public Page<BookingRoom> searchBookingRoomsPage(String code, Long status, LocalDate startDate, LocalDate endDate, Pageable pageable) {
-        LocalDateTime startDateTime = startDate.atStartOfDay();
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-        return bookingRoomRepository.searchBookingRoomsPage(code, status, startDateTime, endDateTime, pageable);
+    public Page<BookingRoom> searchBookingRoomsPage(Long customerId, String code, Long status, Long startTime, Long endTime, Pageable pageable) {
+        LocalDateTime startDate = startTime != null ? LocalDateTime.ofInstant(Instant.ofEpochMilli(startTime),
+                        TimeZone.getDefault().toZoneId()) : null;
+        LocalDateTime endDate = startTime != null ? LocalDateTime.ofInstant(Instant.ofEpochMilli(endTime),
+                TimeZone.getDefault().toZoneId()) : null;
+        return bookingRoomRepository.searchBookingRoomsPage(customerId, code, status, startDate, endDate, pageable);
     }
 
     @Override
