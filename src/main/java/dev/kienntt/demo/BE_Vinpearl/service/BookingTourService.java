@@ -39,7 +39,7 @@ public interface BookingTourService {
 
     Map<String, Long> getBookingTourCountByMonth();
 
-    Page<BookingTour> searchBookingTour(Long customerId, String code, Long status, Long startTime, Long endTime, Pageable pageable);
+    Page<BookingTour> searchBookingTour(Long customerId, String code, Long status, LocalDate startTime, LocalDate endTime, Pageable pageable);
 
     BookingTour saveBookingTour(BookingTour bookingTour) throws UnsupportedEncodingException;
 

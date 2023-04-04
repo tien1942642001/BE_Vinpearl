@@ -31,7 +31,7 @@ public class HotelController {
 //        return new ResponseMessage(200, "Success", "", null);
 //    }
 
-    @PostMapping("/create")
+    @PostMapping("/save")
     public ResponseMessage createHotel(@RequestParam String name,
                                        @RequestParam String email,
                                        @RequestParam String description,
@@ -41,7 +41,7 @@ public class HotelController {
                                        @RequestParam Long totalRoom,
                                        @RequestParam Long siteId,
                                        @RequestParam(required = false) Long id,
-                                       @RequestParam MultipartFile[] images) throws IOException {
+                                       @RequestParam(required = false) MultipartFile[] images) throws IOException {
         Hotel hotel = new Hotel();
         hotel.setCreatedDate(localDateTime.toString());
         hotel.setCreatedBy(hotel.getCreator());
@@ -70,7 +70,7 @@ public class HotelController {
                                        @RequestParam String phone,
                                        @RequestParam Long totalRoom,
                                        @RequestParam Long siteId,
-                                       @RequestParam MultipartFile[] images) throws IOException {
+                                       @RequestParam(required = false) MultipartFile[] images) throws IOException {
         Optional<Hotel> hotel = hotelService.findById(Long.parseLong(id));
         hotel.get().setCreatedDate(localDateTime.toString());
         hotel.get().setCreatedBy(hotel.get().getCreator());

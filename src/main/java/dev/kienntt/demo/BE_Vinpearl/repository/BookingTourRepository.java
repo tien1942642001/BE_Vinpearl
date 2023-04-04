@@ -28,8 +28,8 @@ public interface BookingTourRepository extends PagingAndSortingRepository<Bookin
             "(:customerId is null or b.customerId = :customerId) and " +
             "(:status is null or b.paymentStatus = :status) and " +
             "(:code is null or b.code LIKE CONCAT('%',:code, '%')) and " +
-            "(:startTime is null or :endTime is null or b.paymentDate between :startTime and :endTime)")
-    Page<BookingTour> searchBookingTour(Long customerId, String code, Long status, LocalDateTime startTime, LocalDateTime endTime, Pageable pageable);
+            "(:startDate is null or :endDate is null or (b.paymentDate between :startDate and :endDate))")
+    Page<BookingTour> searchBookingTour(Long customerId, String code, Long status, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);
 
     @Query("SELECT b FROM BookingTour b where b.paymentCode = :paymentCode")
     BookingTour findByPaymentCode(String paymentCode);

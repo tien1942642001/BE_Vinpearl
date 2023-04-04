@@ -43,7 +43,7 @@ public class RoomController {
 //        return new ResponseMessage(200, "Success", "", null);
 //    }
 
-    @PostMapping("/room-type/create")
+    @PostMapping("/room-type/save")
     public ResponseMessage createNewRoomType(@RequestParam String name,
                                        @RequestParam Long acreage,
                                        @RequestParam Long numberAdult,
@@ -52,7 +52,7 @@ public class RoomController {
                                        @RequestParam Long hotelId,
                                        @RequestParam(required = false) Long id,
                                        @RequestParam Long numberOfRooms,
-                                       @RequestParam MultipartFile[] images) throws IOException {
+                                       @RequestParam(required = false) MultipartFile[] images) throws IOException {
         RoomType roomType = new RoomType();
         roomType.setCreatedDate(localDateTime.toString());
         roomType.setCreatedBy(roomType.getCreator());

@@ -62,17 +62,19 @@ public class TourServiceImpl implements TourService {
         LocalDateTime getEndDate =
                 Instant.ofEpochMilli(tour.getEndDateMls()).atZone(ZoneId.systemDefault()).toLocalDateTime();
         tour.setExpirationDate(getExpirationDate);
-        tour.setExpirationDate(getStartDate);
-        tour.setExpirationDate(getEndDate);
+        tour.setStartDate(getStartDate);
+        tour.setEndDate(getEndDate);
         tour.setRemainingOfPeople(tour.getNumberOfPeople());
         Tour tour1 = tourRepository.save(tour);
         if (tour.getId() != null) {
-            // Xóa tất cả bản ghi ImageTour liên quan đến tour hiện tại
-            imageTourRepository.deleteByTourId(tour1.getId());
+            if (images != null) {
+                // Xóa tất cả bản ghi ImageTour liên quan đến tour hiện tại
+                imageTourRepository.deleteByTourId(tour1.getId());
 
-            // Thêm các ảnh mới vào
-            for (MultipartFile image : images) {
-                saveFile(tour1.getId(), image);
+                // Thêm các ảnh mới vào
+                for (MultipartFile image : images) {
+                    saveFile(tour1.getId(), image);
+                }
             }
         } else {
             tour1.setCode(String.format("GN%06d", tour1.getId()));

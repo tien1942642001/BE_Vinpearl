@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -93,12 +94,12 @@ public class BookingRoomController {
     @GetMapping("/search")
     public ResponseMessage searchRoomsPage(@RequestParam(required = false) String code,
                                             @RequestParam(required = false) Long status,
-                                            @RequestParam(required = false) Long startTime,
-                                           @RequestParam(required = false) Long endTime,
+                                           @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                           @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
                                            @RequestParam(required = false) Long customerId,
                                            Pageable pageable) {
 
-        Page<BookingRoom> list = bookingRoomService.searchBookingRoomsPage(customerId, code, status, startTime, endTime, pageable);
+        Page<BookingRoom> list = bookingRoomService.searchBookingRoomsPage(customerId, code, status, startDate, endDate, pageable);
         return new ResponseMessage(200, "Success", list, null);
     }
 

@@ -54,7 +54,7 @@ public class TourController {
                                       @RequestParam Long startDateMls,
                                       @RequestParam Long endDateMls,
                                       @RequestParam(required = false) Long id,
-                                       @RequestParam MultipartFile[] images) throws IOException {
+                                       @RequestParam(required = false) MultipartFile[] images) throws IOException {
         Tour tour = new Tour();
         tour.setCreatedDate(localDateTime.toString());
         tour.setName(name);

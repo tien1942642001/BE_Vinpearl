@@ -32,7 +32,7 @@ public interface BookingRoomService {
 
     void deleteBookingRoom(Long id);
 
-    Page<BookingRoom> searchBookingRoomsPage(Long customerId, String code, Long status, Long startTime, Long endTime, Pageable pageable);
+    Page<BookingRoom> searchBookingRoomsPage(Long customerId, String code, Long status, LocalDate startTime, LocalDate endTime, Pageable pageable);
 
     Long findAllByMonth(Long startMonth, Long endMonth);
 

@@ -49,9 +49,21 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public ImageHotel save(Hotel hotel, MultipartFile[] images) throws IOException {
         Hotel hotel1 = hotelRepository.save(hotel);
+        if (hotel.getId() != null) {
+            if (images != null) {
+                // Xóa tất cả bản ghi ImageTour liên quan đến tour hiện tại
+                imageHotelRepository.deleteByHotelId(hotel1.getId());
 
-        for (MultipartFile image : images) {
-            saveFile(hotel1.getId(), image);
+                // Thêm các ảnh mới vào
+                for (MultipartFile image : images) {
+                    saveFile(hotel1.getId(), image);
+                }
+            }
+        } else {
+            hotelRepository.save(hotel1);
+            for (MultipartFile image : images) {
+                saveFile(hotel1.getId(), image);
+            }
         }
         return null;
     }

@@ -168,13 +168,15 @@ public class BookingTourServiceImpl implements BookingTourService {
     }
 
     @Override
-    public Page<BookingTour> searchBookingTour(Long customerId, String code, Long stauts, Long startTime, Long endTime, Pageable pageable) {
+    public Page<BookingTour> searchBookingTour(Long customerId, String code, Long stauts, LocalDate startDate, LocalDate endDate, Pageable pageable) {
 //        PageRequest page_req = new PageRequest(0, buildingId, Sort.Direction.DESC, "idNode");
-        LocalDateTime startDate = startTime != null ? LocalDateTime.ofInstant(Instant.ofEpochMilli(startTime),
-                TimeZone.getDefault().toZoneId()) : null;
-        LocalDateTime endDate = startTime != null ? LocalDateTime.ofInstant(Instant.ofEpochMilli(endTime),
-                TimeZone.getDefault().toZoneId()) : null;
-        return bookingTourRepository.searchBookingTour(customerId, code, stauts, startDate, endDate, pageable);
+//        LocalDateTime startDate = startTime != null ? LocalDateTime.ofInstant(Instant.ofEpochMilli(startTime),
+//                TimeZone.getDefault().toZoneId()) : null;
+//        LocalDateTime endDate = startTime != null ? LocalDateTime.ofInstant(Instant.ofEpochMilli(endTime),
+//                TimeZone.getDefault().toZoneId()) : null;
+        LocalDateTime startTime = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime endTime = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
+        return bookingTourRepository.searchBookingTour(customerId, code, stauts, startTime, endTime, pageable);
     }
 
     @Override
@@ -358,7 +360,7 @@ public class BookingTourServiceImpl implements BookingTourService {
         sheet.shiftRows(firstMovedIndex, lastMovedIndex, moveRowCount, true, false);
 
         // Create the header row
-        String[] headers = {"Mã đơn hàng", "Tên khách hàng", "Email", "Số điện thoại", "Ngày bắt đầu", "Ngày kết thúc", "Phòng", "Loại phòng", "Ngày chuyển khoản", "Số tiền", "Trạng thái"};
+        String[] headers = {"Mã đơn hàng", "Tên khách hàng", "Email", "Số điện thoại", "Tên tour", "Loại tour", "Số người lớn", "Số trẻ em", "Ngày bắt đầu", "Ngày kết thúc", "Phòng", "Loại phòng", "Ngày chuyển khoản", "Số tiền", "Trạng thái"};
         Row headerRow = sheet.createRow(6);
         for (int i = 0; i < headers.length; i++) {
             Cell cell = headerRow.createCell(i);
@@ -402,38 +404,63 @@ public class BookingTourServiceImpl implements BookingTourService {
             row.createCell(2).setCellValue(bookingTour.getCustomer().getEmail());
             row.createCell(3).setCellValue(bookingTour.getCustomer().getPhone());
 
-            DateTimeFormatter formatterCheckIn = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-            String formattedTourStartDate = bookingTour.getTour().getStartDate().format(formatterCheckIn);
+            row.createCell(4).setCellValue(bookingTour.getTour().getName());
 
-            row.createCell(4).setCellValue(formattedTourStartDate);
+            if (bookingTour.getTour().getTypeOfTourId() == 1) {
+                row.createCell(5).setCellValue("Gói nghỉ dưỡng");
+            } else if (bookingTour.getTour().getTypeOfTourId() == 2) {
+                row.createCell(5).setCellValue("VinWonders");
+            } else if (bookingTour.getTour().getTypeOfTourId() == 3) {
+                row.createCell(5).setCellValue("Vận chuyển");
+            } else if (bookingTour.getTour().getTypeOfTourId() == 4) {
+                row.createCell(5).setCellValue("Vinpearl Golf");
+            } else if (bookingTour.getTour().getTypeOfTourId() == 5) {
+                row.createCell(5).setCellValue("Ẩm thực");
+            } else if (bookingTour.getTour().getTypeOfTourId() == 6) {
+                row.createCell(5).setCellValue("Tour");
+            } else if (bookingTour.getTour().getTypeOfTourId() == 7) {
+                row.createCell(5).setCellValue("Vé tham quan");
+            } else if (bookingTour.getTour().getTypeOfTourId() == 8) {
+                row.createCell(5).setCellValue("Spa");
+            }else  {
+                row.createCell(5).setCellValue("");
+            }
 
-            DateTimeFormatter formatterCheckOut = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
-            String formattedTourEndDate = bookingTour.getTour().getEndDate().format(formatterCheckOut);
+            row.createCell(6).setCellValue(bookingTour.getNumberAdult());
+            row.createCell(7).setCellValue(bookingTour.getNumberChildren());
 
-            row.createCell(5).setCellValue(formattedTourEndDate);
+            DateTimeFormatter formatterStartDate = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+            String formattedTourStartDate = bookingTour.getTour().getStartDate().format(formatterStartDate);
 
-            row.createCell(6).setCellValue(bookingTour.getRoom().getNumberRoom());
-            row.createCell(7).setCellValue(bookingTour.getRoom().getRoomTypes().getName());
+            row.createCell(8).setCellValue(formattedTourStartDate);
+
+            DateTimeFormatter formatterEndDate = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+            String formattedTourEndDate = bookingTour.getTour().getEndDate().format(formatterEndDate);
+
+            row.createCell(9).setCellValue(formattedTourEndDate);
+
+            row.createCell(10).setCellValue(bookingTour.getRoom().getNumberRoom());
+            row.createCell(11).setCellValue(bookingTour.getRoom().getRoomTypes().getName());
 
             DateTimeFormatter formatterPaymentDate = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
             String formattedPaymentDate = bookingTour.getPaymentDate().format(formatterPaymentDate);
 
-            row.createCell(8).setCellValue(formattedPaymentDate);
+            row.createCell(12).setCellValue(formattedPaymentDate);
 
 
             DecimalFormat decimalFormat = new DecimalFormat("#,##0");
             String formattedPrice = decimalFormat.format(bookingTour.getPaymentAmount());
             String formattedPriceWithDot = formattedPrice.replace(",", ".");
-            row.createCell(9).setCellValue(formattedPriceWithDot + " VNĐ");
+            row.createCell(13).setCellValue(formattedPriceWithDot + " VNĐ");
 
             if (bookingTour.getPaymentStatus() == 0) {
-                row.createCell(10).setCellValue("Đã hủy");
+                row.createCell(14).setCellValue("Đã hủy");
             } else if (bookingTour.getPaymentStatus() == 1) {
-                row.createCell(10).setCellValue("Thành công");
+                row.createCell(14).setCellValue("Thành công");
             } else if (bookingTour.getPaymentStatus() == 2) {
-                row.createCell(10).setCellValue("Thành công");
+                row.createCell(14).setCellValue("Thành công");
             } else {
-                row.createCell(10).setCellValue("Đã hủy");
+                row.createCell(14).setCellValue("Đã hủy");
             }
 
             CellStyle style = workbook.createCellStyle();
