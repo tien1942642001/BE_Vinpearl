@@ -19,6 +19,8 @@ public interface ServiceRepository extends PagingAndSortingRepository<Service, L
     public Long findMinPriceByRoomTypeId(Long roomTypeId);
 
     @Query("SELECT s FROM Service s WHERE " +
-            "(:name is null or s.name LIKE CONCAT('%',:name, '%'))")
-    Page<Service> search(String name, Pageable pageable);
+            "(:name is null or s.name LIKE CONCAT('%',:name, '%')) and " +
+            "(:description is null or EXISTS (SELECT sd FROM s.descriptions sd WHERE sd.name LIKE CONCAT('%',:description, '%'))) and " +
+            "(:price is null or s.price = :price)")
+    Page<Service> search(String name, String description, Long price, Pageable pageable);
 }

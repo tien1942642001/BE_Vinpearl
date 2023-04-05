@@ -48,7 +48,7 @@ public class BookingTour extends BaseEntity {
     @Column(name = "room_id")
     private Long roomId;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne()
     @JoinColumn(name = "customer_id", referencedColumnName = "id", insertable = false, updatable = false)
     private Customer customer;
 
@@ -59,6 +59,10 @@ public class BookingTour extends BaseEntity {
     @ManyToOne()
     @JoinColumn(name = "tour_id", nullable = false, insertable = false, updatable = false)
     private Tour tour;
+
+//    @ManyToOne()
+//    @JoinColumn(name = "hotel_id", nullable = false, insertable = false, updatable = false)
+//    private Hotel hotel;
 
     @Transient
     private String url;

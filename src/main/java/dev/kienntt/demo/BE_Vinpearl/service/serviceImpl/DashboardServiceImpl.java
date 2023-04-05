@@ -1,5 +1,7 @@
 package dev.kienntt.demo.BE_Vinpearl.service.serviceImpl;
 
+import dev.kienntt.demo.BE_Vinpearl.domain.request.BookingTourStatistic;
+import dev.kienntt.demo.BE_Vinpearl.model.BookingTour;
 import dev.kienntt.demo.BE_Vinpearl.repository.BookingRoomRepository;
 import dev.kienntt.demo.BE_Vinpearl.repository.BookingTourRepository;
 import dev.kienntt.demo.BE_Vinpearl.repository.TourRepository;
@@ -44,6 +46,22 @@ public class DashboardServiceImpl implements DashboardService {
         tourMap.put("total", totalTour);
         result.add(tourMap);
 
+        return result;
+    }
+
+    @Override
+    public List<BookingTourStatistic> statistics() {
+        List<BookingTour> bookingTours = bookingTourRepository.findAllBookingTour();
+
+        List<BookingTourStatistic> result = new ArrayList<>();
+        for (int i = 1; i <= 12; i++) {
+            String month = String.format("Tháng %d", i);
+            int finalI = i;
+            long count = bookingTours.stream()
+                    .filter(bookingTour -> bookingTour.getPaymentDate().getMonthValue() == finalI)
+                    .count();
+            result.add(new BookingTourStatistic(month, count));
+        }
         return result;
     }
 }

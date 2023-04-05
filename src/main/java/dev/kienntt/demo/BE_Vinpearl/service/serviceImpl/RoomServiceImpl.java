@@ -11,6 +11,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,13 +39,16 @@ public class RoomServiceImpl implements RoomService {
     @Override
     public Room save(Room room) {
         Optional<RoomType> roomType = roomTypeRepository.findById(room.getRoomTypeId());
-        int numRooms = roomRepository.countRooms(room.getRoomTypeId());
-        Room room1 =  roomRepository.save(room);
-        if (numRooms >= roomType.get().getNumberOfRooms()) {
-            throw new RuntimeException("Đã đạt tối đa số lượng phòng cho phép");
+        if (room.getId() == null) {
+            int numRooms = roomRepository.countRooms(room.getRoomTypeId());
+            Room room1 =  roomRepository.save(room);
+            if (numRooms >= roomType.get().getNumberOfRooms()) {
+                throw new RuntimeException("Đã đạt tối đa số lượng phòng cho phép");
+            }
+            room1.setNumberRoom(String.format("RM%3d", room1.getId()));
+            return roomRepository.save(room1);
         }
-        room1.setNumberRoom(String.format("RM%3d", room1.getId()));
-        return roomRepository.save(room1);
+        return  roomRepository.save(room);
     }
 
     @Override
@@ -60,8 +66,17 @@ public class RoomServiceImpl implements RoomService {
     }
 
     @Override
-    public Page<Room> searchRoomPage(String name, String roomType, Long status, Pageable pageable) {
-        return roomRepository.searchRoomsPage(name, roomType, status, pageable);
+    public Page<Room> searchRoomPage(String name, String roomType, Long status, Long startTime, Long endTime, Pageable pageable) {
+        LocalDateTime startDate = startTime != null ? Instant.ofEpochMilli(startTime).atZone(ZoneId.systemDefault()).toLocalDateTime() : null;
+        LocalDateTime endDate = endTime != null ? Instant.ofEpochMilli(endTime).atZone(ZoneId.systemDefault()).toLocalDateTime() : null;
+        return roomRepository.searchRoomsPage(name, roomType, status, startDate, endDate, pageable);
+    }
+
+    @Override
+    public Page<Room> searchRoomPageAdmin(String name, String roomType, Long status, Long startTime, Long endTime, Pageable pageable) {
+        LocalDateTime startDate = startTime != null ? Instant.ofEpochMilli(startTime).atZone(ZoneId.systemDefault()).toLocalDateTime() : null;
+        LocalDateTime endDate = endTime != null ? Instant.ofEpochMilli(endTime).atZone(ZoneId.systemDefault()).toLocalDateTime() : null;
+        return roomRepository.searchRoomsPageAdmin(name, roomType, status, startDate, endDate, pageable);
     }
 
 //    @Override

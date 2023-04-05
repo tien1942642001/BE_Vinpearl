@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<User> searchUser(Long hotelId, String name , String phone, Pageable pageable) {
-        return userRepository.searchHotel(hotelId, name, phone, pageable);
+    public Page<User> searchUser(Long siteId, String name , String phone, Pageable pageable) {
+        return userRepository.searchHotel(siteId, name, phone, pageable);
     }
 }

@@ -28,8 +28,8 @@ public class JwtTokenProvider {
                 .setSubject(user.getEmail())
                 .setId(UUID.randomUUID().toString())
                 .setIssuedAt(Date.from(now))
-//                .setExpiration(Date.from(now.plus(1l, ChronoUnit.MINUTES)))
-                .setExpiration(Date.from(now.plus(30, ChronoUnit.DAYS)))
+                .setExpiration(Date.from(now.plus(30l, ChronoUnit.MINUTES)))
+//                .setExpiration(Date.from(now.plus(30, ChronoUnit.DAYS)))
                 .signWith(privateKey)
                 .compact();
 
@@ -48,8 +48,7 @@ public class JwtTokenProvider {
                 .setSubject(customer.getEmail())
                 .setId(UUID.randomUUID().toString())
                 .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(now.plus(20l, ChronoUnit.MINUTES)))
-//                .setExpiration(Date.from(now.plus(30, ChronoUnit.DAYS)))
+                .setExpiration(Date.from(now.plus(365, ChronoUnit.DAYS)))
                 .signWith(privateKey)
                 .compact();
 
@@ -126,12 +125,15 @@ public class JwtTokenProvider {
 
     public void verify(String authorization) throws Exception {
         PublicKey publicKey = getPublicKey();
-        System.out.println("authorization: " +authorization);
         try {
             Jwts.parserBuilder().setSigningKey(publicKey).build()
                     .parseClaimsJws(authorization);
+        } catch (ExpiredJwtException e) {
+            throw new RuntimeException("Token has expired");
+        } catch (PrematureJwtException e) {
+            throw new RuntimeException("Token is not active yet");
         } catch (Exception e) {
-            throw new AccessDeniedException("Access Denied");
+            throw new RuntimeException("Access Denied");
         }
     }
 }

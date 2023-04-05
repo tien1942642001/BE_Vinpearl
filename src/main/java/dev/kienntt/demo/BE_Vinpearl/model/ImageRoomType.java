@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import dev.kienntt.demo.BE_Vinpearl.base.BaseEntity;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -26,5 +27,6 @@ public class ImageRoomType extends BaseEntity {
     @JoinColumn(name = "room_type_id", referencedColumnName = "id", insertable = false, updatable = false)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
+    @JsonIgnore
     private RoomType roomType;
 }

@@ -87,10 +87,8 @@ public class Tour extends BaseEntity {
     @Transient
     private Long endDateMls;
 
-    @Transient
     private Long priceAdult;
 
-    @Transient
     private Long priceChildren;
 
 //    @OneToOne()

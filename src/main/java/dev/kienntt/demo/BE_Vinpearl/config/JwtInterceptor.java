@@ -15,31 +15,18 @@ public class JwtInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        System.out.println("Pre Handle method is Calling");
-        if (!(request.getRequestURI().contains("login") || request.getRequestURI().contains("register"))) {
+        if (!(request.getRequestURI().contains("login") || request.getRequestURI().contains("register") || request.getRequestURI().contains("images"))) {
             String auth = request.getHeader("Authorization");
-            System.out.println("auth: " +auth);
-//            jwtTokenProvider.verify(auth);
-//            jwtTokenProvider.parseJwt(auth);
-//            return true;
+            // Kiểm tra token ở header của request
+            if (auth == null || auth.isEmpty() || !auth.startsWith("Bearer ")) {
+                // Nếu không có token hoặc không đúng định dạng thì trả về lỗi
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                return false;
+            }
+            String token = auth.substring(7, auth.length());
+            jwtTokenProvider.verify(token);
         }
-
-
-//        if ((request.getRequestURI().contains("login") || request.getRequestURI().contains("register"))) {
-//            System.out.println("request.getRequestURI(): " +request.getRequestURI());
-//            return true;
-//        }
-//        String token = request.getHeader("authorization");
-//        if (token == null || !token.startsWith("Bearer ")) {
-//            JwtTokenProvider.parseJwt(token);
-//            return true;
-//        }
-//        String newToken = JwtTokenProvider.createJwtSignedHMAC();
-//        response.setHeader("Authorization", newToken);
-//        response.setHeader("Access-control-expose-headers", "Authorization");
-//        System.out.println("newToken: " +newToken);
-//        return true;
-        return HandlerInterceptor.super.preHandle(request, response, handler);
+        return true;
     }
 
     @Override

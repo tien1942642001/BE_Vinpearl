@@ -12,6 +12,7 @@ import dev.kienntt.demo.BE_Vinpearl.service.BookingTourService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.AccessDeniedException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -93,11 +95,11 @@ public class BookingTourController {
     @GetMapping("/search")
     public ResponseMessage searchBookingTour(@RequestParam(required = false) Long customerId,
                                            @RequestParam(required = false) String code,
-                                           @RequestParam(required = false) Long status,
-                                           @RequestParam(required = false) Long startTime,
-                                           @RequestParam(required = false) Long endTime,
+                                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+                                             @RequestParam(required = false) Long status,
                                            Pageable pageable) {
-        Page<BookingTour> list = bookingTourService.searchBookingTour(customerId, code, status, startTime, endTime, pageable);
+        Page<BookingTour> list = bookingTourService.searchBookingTour(customerId, code, status, startDate, endDate, pageable);
         return new ResponseMessage(200, "Success", list, null);
     }
 

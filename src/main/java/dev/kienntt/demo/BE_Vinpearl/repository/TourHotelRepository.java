@@ -12,4 +12,5 @@ public interface TourHotelRepository extends PagingAndSortingRepository<TourHote
 
     List<TourHotel> findByTourId(Long tourId);
     List<TourHotel> findByHotelId(Long hotelId);
+    TourHotel findByTourIdAndHotelId(Long tourId, Long hotelId);
 }

@@ -29,8 +29,11 @@ public class ServiceController {
     }
 
     @GetMapping("/search")
-    public ResponseMessage search(@RequestParam(required = false) String name, Pageable pageable) {
-        Page<Service> listService = serviceService.search(name, pageable);
+    public ResponseMessage search(@RequestParam(required = false) String name,
+                                  @RequestParam(required = false) String description,
+                                  @RequestParam(required = false) Long price,
+                                  Pageable pageable) {
+        Page<Service> listService = serviceService.search(name, description, price, pageable);
         return new ResponseMessage(200, "Success", listService, null);
     }
 

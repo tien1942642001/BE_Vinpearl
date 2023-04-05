@@ -59,7 +59,7 @@ public class PostController {
     public ResponseMessage addPost(@RequestParam String name,
                                        @RequestParam String content,
                                        @RequestParam Long siteId,
-                                       @RequestParam Long hotelId,
+                                       @RequestParam (required = false) Long hotelId,
                                         @RequestParam Long customerId,
                                        @RequestParam MultipartFile images) throws IOException {
         Post post = new Post();
@@ -67,7 +67,9 @@ public class PostController {
         post.setName(name);
         post.setContent(content);
         post.setSiteId(siteId);
-        post.setHotelId(hotelId);
+        if (hotelId != null) {
+            post.setHotelId(hotelId);
+        }
         post.setCustomerId(customerId);
         postService.add(post, images);
         return new ResponseMessage(200, "Success", "", null);

@@ -3,9 +3,12 @@ package dev.kienntt.demo.BE_Vinpearl.controller;
 import dev.kienntt.demo.BE_Vinpearl.config.JwtTokenProvider;
 import dev.kienntt.demo.BE_Vinpearl.model.Customer;
 import dev.kienntt.demo.BE_Vinpearl.base.ResponseMessage;
+import dev.kienntt.demo.BE_Vinpearl.model.User;
 import dev.kienntt.demo.BE_Vinpearl.service.CustomerService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.NoSuchAlgorithmException;
@@ -73,5 +76,14 @@ public class CustomerController {
             return new ResponseMessage(200, "Success", null, null);
         })
                 .orElseGet(() -> new ResponseMessage(404, "Error", null, "No result with query"));
+    }
+
+    @GetMapping("/search")
+    public ResponseMessage search(@RequestParam(required = false) String email,
+                                       @RequestParam(required = false) String name,
+                                       @RequestParam(required = false) String phone,
+                                       Pageable pageable) {
+        Page<Customer> listCustomer = customerService.search(email, name, phone, pageable);
+        return new ResponseMessage(200, "Success", listCustomer, null);
     }
 }

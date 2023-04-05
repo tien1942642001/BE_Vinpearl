@@ -119,7 +119,7 @@ public class BookingServiceImpl implements BookingRoomService {
                 Instant.ofEpochMilli(bookingRoomRequest.getCheckOut()).atZone(ZoneId.systemDefault()).toLocalDateTime();
 
 //        List<Room> availableRooms = roomRepository.findByRoomTypeId(roomTypeId, 0L);
-        List<Room> availableRooms = roomRepository.findRoomEmpty(roomTypeId, 0L, dateCheckIn, dateCheckOut);
+        List<Room> availableRooms = roomRepository.findRoomEmpty(roomTypeId, dateCheckIn, dateCheckOut);
         if (availableRooms.isEmpty()) {
             new RuntimeException("Không có phòng trống");
         }
@@ -197,10 +197,14 @@ public class BookingServiceImpl implements BookingRoomService {
     }
 
     @Override
-    public Page<BookingRoom> searchBookingRoomsPage(String code, Long status, LocalDate startDate, LocalDate endDate, Pageable pageable) {
-        LocalDateTime startDateTime = startDate.atStartOfDay();
-        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
-        return bookingRoomRepository.searchBookingRoomsPage(code, status, startDateTime, endDateTime, pageable);
+    public Page<BookingRoom> searchBookingRoomsPage(Long customerId, String code, Long status, LocalDate startDate, LocalDate endDate, Pageable pageable) {
+//        LocalDateTime startDate = startTime != null ? LocalDateTime.ofInstant(Instant.ofEpochMilli(startTime),
+//                        TimeZone.getDefault().toZoneId()) : null;
+//        LocalDateTime endDate = startTime != null ? LocalDateTime.ofInstant(Instant.ofEpochMilli(endTime),
+//                TimeZone.getDefault().toZoneId()) : null;
+        LocalDateTime startTime = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime endTime = endDate != null ? endDate.atTime(LocalTime.MAX) : null;
+        return bookingRoomRepository.searchBookingRoomsPage(customerId, code, status, startTime, endTime, pageable);
     }
 
     @Override
@@ -354,22 +358,24 @@ public class BookingServiceImpl implements BookingRoomService {
                 .orElseThrow(() -> new RuntimeException("Customer ID cannot be null."));
 
         // Kiểm tra số phòng còn lại trong loại phòng
-        if (roomType.getRemainingOfRooms() <= 0) {
-            new RuntimeException("No room available");
-        }
-
-        List<Room> availableRooms = roomRepository.findByRoomTypeId(roomTypeId, 0L);
-        if (availableRooms.isEmpty()) {
-            new RuntimeException("No room available");
-        }
-
-        Room roomRandom =  getRandomAvailableRoom(availableRooms);
+//        if (roomType.getRemainingOfRooms() <= 0) {
+//            throw  new RuntimeException("No room available");
+//        }
 
         LocalDateTime dateCheckIn =
                 Instant.ofEpochMilli(bookingRoomRequest.getCheckIn()).atZone(ZoneId.systemDefault()).toLocalDateTime();
 
         LocalDateTime dateCheckOut =
                 Instant.ofEpochMilli(bookingRoomRequest.getCheckOut()).atZone(ZoneId.systemDefault()).toLocalDateTime();
+
+        List<Room> availableRooms = roomRepository.findRoomEmpty(roomTypeId, dateCheckIn, dateCheckOut);
+
+        if (availableRooms.isEmpty()) {
+            throw new RuntimeException("Không còn phòng trống");
+        }
+
+        Room roomRandom =  getRandomAvailableRoom(availableRooms);
+
         String paymentCode = "Hotel" + UUID.randomUUID().toString().replace("-", "");
         LocalDateTime paymentDate = LocalDateTime.now();
         // Tạo mới đối tượng BookingRoom và lưu vào database

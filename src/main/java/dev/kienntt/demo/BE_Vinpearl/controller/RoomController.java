@@ -43,7 +43,7 @@ public class RoomController {
 //        return new ResponseMessage(200, "Success", "", null);
 //    }
 
-    @PostMapping("/room-type/create")
+    @PostMapping("/room-type/save")
     public ResponseMessage createNewRoomType(@RequestParam String name,
                                        @RequestParam Long acreage,
                                        @RequestParam Long numberAdult,
@@ -52,7 +52,7 @@ public class RoomController {
                                        @RequestParam Long hotelId,
                                        @RequestParam(required = false) Long id,
                                        @RequestParam Long numberOfRooms,
-                                       @RequestParam MultipartFile[] images) throws IOException {
+                                       @RequestParam(required = false) MultipartFile[] images) throws IOException {
         RoomType roomType = new RoomType();
         roomType.setCreatedDate(localDateTime.toString());
         roomType.setCreatedBy(roomType.getCreator());
@@ -71,19 +71,29 @@ public class RoomController {
         return new ResponseMessage(200, "Success", "", null);
     }
 
-    @PostMapping("/update")
-    public ResponseMessage updateRoom(@RequestBody Room room) {
-        room.setUpdatedDate(localDateTime.toString());
-        room.setCreatedBy(room.getCreator());
-        roomService.save(room);
-        return new ResponseMessage(200, "Success", room, null);
+    @PutMapping("/update/{id}")
+    public ResponseMessage updateRoom(@PathVariable Long id, @RequestBody Room room) {
+        Optional<Room> roomOptional = roomService.findById(id);
+        roomOptional.get().setUpdatedDate(localDateTime.toString());
+        return roomOptional.map(room1 -> {
+                    room.setId(room1.getId());
+                    room.setNumberRoom(room1.getNumberRoom());
+                    roomService.save(room);
+                    return new ResponseMessage(200, "Success", "", null);
+                })
+                .orElseGet(() -> new ResponseMessage(404, "Error", null, "No result with query"));
     }
 
-    @PostMapping("/room-type/update")
-    public ResponseMessage updateRoomType(@RequestBody RoomType roomType) {
-        roomType.setUpdatedDate(localDateTime.toString());
-        roomTypeService.save(roomType);
-        return new ResponseMessage(200, "Success", roomType, null);
+    @PostMapping("/room-type/update/{id}")
+    public ResponseMessage updateRoomType(@PathVariable Long id, @RequestBody RoomType roomType) {
+        Optional<RoomType> roomTypeOptional = roomTypeService.findById(id);
+        roomTypeOptional.get().setUpdatedDate(localDateTime.toString());
+        return roomTypeOptional.map(roomType1 -> {
+                    roomType.setId(roomType1.getId());
+                    roomTypeService.save(roomType);
+                    return new ResponseMessage(200, "Success", "", null);
+                })
+                .orElseGet(() -> new ResponseMessage(404, "Error", null, "No result with query"));
     }
 
     @GetMapping("/detail/{id}")
@@ -131,8 +141,27 @@ public class RoomController {
     public ResponseMessage searchRoomsPage(@RequestParam(required = false) String name,
                                         @RequestParam(required = false) String roomType,
                                         @RequestParam(required = false) Long status,
+                                           @RequestParam(required = false) Long startTime,
+                                           @RequestParam(required = false) Long endTime,
                                         Pageable pageable) {
-        Page<Room> listRoom = roomService.searchRoomPage(name, roomType, status, pageable);
+        Page<Room> listRoom = roomService.searchRoomPage(name, roomType, status, startTime, endTime, pageable);
+//        return new ResponsePage(200, "Success",
+//                roomPage.getContent(),
+//                roomPage.getTotalElements(),
+//                roomPage.getNumber() + 1,
+//                roomPage.getSize()
+//        );
+        return new ResponseMessage(200, "Success", listRoom, null);
+    }
+
+    @GetMapping("/search-admin")
+    public ResponseMessage searchRoomsPageAdmin(@RequestParam(required = false) String name,
+                                           @RequestParam(required = false) String roomType,
+                                           @RequestParam(required = false) Long status,
+                                           @RequestParam(required = false) Long startTime,
+                                           @RequestParam(required = false) Long endTime,
+                                           Pageable pageable) {
+        Page<Room> listRoom = roomService.searchRoomPageAdmin(name, roomType, status, startTime, endTime, pageable);
 //        return new ResponsePage(200, "Success",
 //                roomPage.getContent(),
 //                roomPage.getTotalElements(),
@@ -147,9 +176,11 @@ public class RoomController {
                                                 @RequestParam(required = false) String hotelName,
                                              @RequestParam(required = false) Long acreage,
                                              @RequestParam(required = false) String name,
+                                                @RequestParam(required = false) Long startTime,
+                                                @RequestParam(required = false) Long endTime,
                                              Pageable pageable) {
 
-        Page<RoomType> listRoom = roomTypeService.searchRoomTypesPage(numberPerson, hotelName, acreage, name, pageable);
+        Page<RoomType> listRoom = roomTypeService.searchRoomTypesPage(numberPerson, hotelName, acreage, name, startTime, endTime, pageable);
         return new ResponseMessage(200, "Success", listRoom, null);
     }
 

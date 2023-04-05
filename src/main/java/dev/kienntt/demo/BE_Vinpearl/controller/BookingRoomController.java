@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -92,10 +94,12 @@ public class BookingRoomController {
     @GetMapping("/search")
     public ResponseMessage searchRoomsPage(@RequestParam(required = false) String code,
                                             @RequestParam(required = false) Long status,
-                                            @RequestParam(required = false) String startDate,
-                                           @RequestParam(required = false) String endDate,
+                                           @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+                                           @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+                                           @RequestParam(required = false) Long customerId,
                                            Pageable pageable) {
-        Page<BookingRoom> list = bookingRoomService.searchBookingRoomsPage(code, status, LocalDate.parse(startDate), LocalDate.parse(endDate), pageable);
+
+        Page<BookingRoom> list = bookingRoomService.searchBookingRoomsPage(customerId, code, status, startDate, endDate, pageable);
         return new ResponseMessage(200, "Success", list, null);
     }
 

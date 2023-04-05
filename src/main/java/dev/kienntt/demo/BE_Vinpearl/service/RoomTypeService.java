@@ -21,7 +21,7 @@ public interface RoomTypeService {
 
     void deleteRoomType(Long id);
 
-    Page<RoomType> searchRoomTypesPage(Long numberPerson, String hotelName, Long acreage, String name, Pageable pageable);
+    Page<RoomType> searchRoomTypesPage(Long numberPerson, String hotelName, Long acreage, String name, Long startTime, Long endTime, Pageable pageable);
 
     List<RoomType> findRoomTypeByHotelId(Long hotelId);
 

@@ -14,8 +14,8 @@ public interface UserRepository extends PagingAndSortingRepository<User, Long> {
     User findByEmail(String email);
 
     @Query("SELECT u FROM User u WHERE " +
-            "(:hotelId is null or u.hotelId = :hotelId) and " +
+            "(:siteId is null or u.siteId = :siteId) and " +
             "(:name is null or u.fullName LIKE CONCAT('%',:name, '%')) and " +
             "(:phone is null or u.phone LIKE CONCAT('%',:phone, '%'))")
-    Page<User> searchHotel(Long hotelId, String name, String phone, Pageable pageable);
+    Page<User> searchHotel(Long siteId, String name, String phone, Pageable pageable);
 }

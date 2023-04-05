@@ -86,11 +86,11 @@ public class AuthController {
     }
 
     @GetMapping("/search")
-    public ResponseMessage searchUsers(@RequestParam(required = false) Long hotelId,
+    public ResponseMessage searchUsers(@RequestParam(required = false) Long siteId,
                                             @RequestParam(required = false) String name,
                                             @RequestParam(required = false) String phone,
                                             Pageable pageable) {
-        Page<User> listUser = userService.searchUser(hotelId, name, phone, pageable);
+        Page<User> listUser = userService.searchUser(siteId, name, phone, pageable);
         return new ResponseMessage(200, "Success", listUser, null);
     }
 

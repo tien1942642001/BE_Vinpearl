@@ -15,6 +15,9 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,24 +45,20 @@ public class RoomTypeServiceImpl implements RoomTypeService {
     @Override
     public ImageRoomType save(RoomType roomType, MultipartFile[] images) throws IOException {
         RoomType roomType1 = roomTypeRepository.save(roomType);
+        if (roomType.getId() != null) {
+            if (images != null) {
+                imageRoomTypeRepository.deleteByRoomTypeId(roomType1.getId());
 
-        for (MultipartFile image : images) {
-            Path staticPath = Paths.get("static");
-            Path imagePath = Paths.get("images");
-            if (!Files.exists(CURRENT_FOLDER.resolve(staticPath).resolve(imagePath))) {
-                Files.createDirectories(CURRENT_FOLDER.resolve(staticPath).resolve(imagePath));
+                // Thêm các ảnh mới vào
+                for (MultipartFile image : images) {
+                    saveFile(roomType1.getId(), image);
+                }
             }
-            Path files = CURRENT_FOLDER.resolve(staticPath)
-                    .resolve(imagePath).resolve(image.getOriginalFilename());
-            try (OutputStream os = Files.newOutputStream(files)) {
-                os.write(image.getBytes());
+        } else {
+            roomTypeRepository.save(roomType1);
+            for (MultipartFile image : images) {
+                saveFile(roomType1.getId(), image);
             }
-
-            ImageRoomType imageRoomType = new ImageRoomType();
-            imageRoomType.setRoomTypeId(roomType1.getId());
-            imageRoomType.setName(imagePath.resolve(image.getOriginalFilename()).toString());
-            imageRoomType.setPath(domain + imagePath.resolve(image.getOriginalFilename()));
-            imageRoomTypeRepository.save(imageRoomType);
         }
         return null;
     }
@@ -78,13 +77,33 @@ public class RoomTypeServiceImpl implements RoomTypeService {
         }
     }
     @Override
-    public Page<RoomType> searchRoomTypesPage(Long numberPerson, String hotelName, Long acreage, String name, Pageable pageable) {
-//        return roomTypeRepository.searchRoomTypesPage(acreage, name, pageable);
-        return roomTypeRepository.searchRoomTypesPage(numberPerson, hotelName, acreage, name, pageable);
+    public Page<RoomType> searchRoomTypesPage(Long numberPerson, String hotelName, Long acreage, String name, Long startTime, Long endTime, Pageable pageable) {
+        LocalDateTime startDate = startTime != null ? Instant.ofEpochMilli(startTime).atZone(ZoneId.systemDefault()).toLocalDateTime() : null;
+        LocalDateTime endDate = endTime != null ? Instant.ofEpochMilli(endTime).atZone(ZoneId.systemDefault()).toLocalDateTime() : null;
+        return roomTypeRepository.searchRoomTypesPage(numberPerson, hotelName, acreage, name, startDate, endDate, pageable);
     }
 
     @Override
     public List<RoomType> findRoomTypeByHotelId(Long hotelId) {
         return roomTypeRepository.findRoomTypeByHotelId(hotelId);
+    }
+
+    public void saveFile(Long id, MultipartFile image) throws IOException {
+        Path staticPath = Paths.get("static");
+        Path imagePath = Paths.get("images");
+        if (!Files.exists(CURRENT_FOLDER.resolve(staticPath).resolve(imagePath))) {
+            Files.createDirectories(CURRENT_FOLDER.resolve(staticPath).resolve(imagePath));
+        }
+        Path files = CURRENT_FOLDER.resolve(staticPath)
+                .resolve(imagePath).resolve(image.getOriginalFilename());
+        try (OutputStream os = Files.newOutputStream(files)) {
+            os.write(image.getBytes());
+        }
+
+        ImageRoomType imageRoomType = new ImageRoomType();
+        imageRoomType.setRoomTypeId(id);
+        imageRoomType.setName(imagePath.resolve(image.getOriginalFilename()).toString());
+        imageRoomType.setPath(domain + imagePath.resolve(image.getOriginalFilename()));
+        imageRoomTypeRepository.save(imageRoomType);
     }
 }
