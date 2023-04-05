@@ -21,5 +21,5 @@ public interface UserService {
 
     User findByEmail(String email);
 
-    Page<User> searchUser(Long hotelId, String name, String phone, Pageable pageable);
+    Page<User> searchUser(Long siteId, String name, String phone, Pageable pageable);
 }

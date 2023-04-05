@@ -24,7 +24,7 @@ public interface ServiceService {
 
     void remove(Long id);
 
-    Page<Service> search(String name, Pageable pageable);
+    Page<Service> search(String name, String description, Long price, Pageable pageable);
 
     ServiceDescription saveServiceDescriptionContent(Service service);
 }

@@ -46,9 +46,9 @@ public class ServiceServiceImpl implements ServiceService {
     }
 
     @Override
-    public Page<Service> search(String name, Pageable pageable) {
+    public Page<Service> search(String name, String description, Long price, Pageable pageable) {
 //        return roomTypeRepository.searchRoomTypesPage(acreage, name, pageable);
-        return serviceRepository.search(name, pageable);
+        return serviceRepository.search(name, description, price, pageable);
     }
 
     @Override

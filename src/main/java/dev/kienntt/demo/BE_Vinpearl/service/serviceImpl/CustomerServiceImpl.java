@@ -6,6 +6,8 @@ import dev.kienntt.demo.BE_Vinpearl.model.User;
 import dev.kienntt.demo.BE_Vinpearl.repository.CustomerRepository;
 import dev.kienntt.demo.BE_Vinpearl.service.CustomerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -45,5 +47,10 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public List<CustomerTop5Dto> getTop5() {
         return customerRepository.getTop5();
+    }
+
+    @Override
+    public Page<Customer> search(String email, String name , String phone, Pageable pageable) {
+        return customerRepository.search(email, name, phone, pageable);
     }
 }

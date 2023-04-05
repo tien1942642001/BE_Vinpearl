@@ -77,6 +77,7 @@ public class RoomController {
         roomOptional.get().setUpdatedDate(localDateTime.toString());
         return roomOptional.map(room1 -> {
                     room.setId(room1.getId());
+                    room.setNumberRoom(room1.getNumberRoom());
                     roomService.save(room);
                     return new ResponseMessage(200, "Success", "", null);
                 })
@@ -144,6 +145,23 @@ public class RoomController {
                                            @RequestParam(required = false) Long endTime,
                                         Pageable pageable) {
         Page<Room> listRoom = roomService.searchRoomPage(name, roomType, status, startTime, endTime, pageable);
+//        return new ResponsePage(200, "Success",
+//                roomPage.getContent(),
+//                roomPage.getTotalElements(),
+//                roomPage.getNumber() + 1,
+//                roomPage.getSize()
+//        );
+        return new ResponseMessage(200, "Success", listRoom, null);
+    }
+
+    @GetMapping("/search-admin")
+    public ResponseMessage searchRoomsPageAdmin(@RequestParam(required = false) String name,
+                                           @RequestParam(required = false) String roomType,
+                                           @RequestParam(required = false) Long status,
+                                           @RequestParam(required = false) Long startTime,
+                                           @RequestParam(required = false) Long endTime,
+                                           Pageable pageable) {
+        Page<Room> listRoom = roomService.searchRoomPageAdmin(name, roomType, status, startTime, endTime, pageable);
 //        return new ResponsePage(200, "Success",
 //                roomPage.getContent(),
 //                roomPage.getTotalElements(),

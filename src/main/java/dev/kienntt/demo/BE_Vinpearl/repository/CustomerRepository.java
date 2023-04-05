@@ -22,4 +22,10 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
             "GROUP BY c.fullName " +
             "order by sum(bt.paymentAmount) DESC")
     List<CustomerTop5Dto> getTop5();
+
+    @Query("SELECT c FROM Customer c WHERE " +
+            "(:email is null or c.email LIKE CONCAT('%',:email, '%')) and " +
+            "(:name is null or c.fullName LIKE CONCAT('%',:name, '%')) and " +
+            "(:phone is null or c.phone LIKE CONCAT('%',:phone, '%'))")
+    Page<Customer> search(String email, String name, String phone, Pageable pageable);
 }

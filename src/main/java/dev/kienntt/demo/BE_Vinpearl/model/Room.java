@@ -39,6 +39,7 @@ public class Room extends BaseEntity {
 
     @ManyToOne()
     @JoinColumn(name = "room_type_id", nullable = false, insertable = false, updatable = false)
+//    @JsonIgnore
     private RoomType roomTypes;
 
     @Column(name = "status")

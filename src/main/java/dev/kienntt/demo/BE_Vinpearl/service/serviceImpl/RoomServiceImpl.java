@@ -72,6 +72,13 @@ public class RoomServiceImpl implements RoomService {
         return roomRepository.searchRoomsPage(name, roomType, status, startDate, endDate, pageable);
     }
 
+    @Override
+    public Page<Room> searchRoomPageAdmin(String name, String roomType, Long status, Long startTime, Long endTime, Pageable pageable) {
+        LocalDateTime startDate = startTime != null ? Instant.ofEpochMilli(startTime).atZone(ZoneId.systemDefault()).toLocalDateTime() : null;
+        LocalDateTime endDate = endTime != null ? Instant.ofEpochMilli(endTime).atZone(ZoneId.systemDefault()).toLocalDateTime() : null;
+        return roomRepository.searchRoomsPageAdmin(name, roomType, status, startDate, endDate, pageable);
+    }
+
 //    @Override
 //    public List<Room> test(Long roomType, Long bookingStart, Long bookingEnd, Pageable pageable) {
 //        List<Room> listRooms = roomRepository.searchRoomsPage(roomType, pageable).getContent();
