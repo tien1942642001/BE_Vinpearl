@@ -11,13 +11,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,6 +42,14 @@ public class TourServiceImpl implements TourService {
 
     @Autowired
     private ServiceRepository serviceRepository;
+
+    @Autowired
+    private HistorySearchRepository searchRepository;
+
+    @Autowired
+    private BookingTourRepository bookingRepository;
+
+    private final int NUM_RECOMMENDATIONS = 10;
 
     @Override
     public List<Tour> findAll() {
@@ -114,6 +122,59 @@ public class TourServiceImpl implements TourService {
     public Page<Tour> searchTourPage(Long siteId, String searchName, Long status, List<Long> lengthStayIds, List<Long> suitableIds, List<Long> typeOfTours, Pageable pageable) {
 //        PageRequest page_req = new PageRequest(0, buildingId, Sort.Direction.DESC, "idNode");
         return tourRepository.searchTourPage(siteId, searchName, status, lengthStayIds, suitableIds, typeOfTours, pageable);
+    }
+
+    @Override
+    public List<Tour> getRecommendedTours(Long customerId) {
+        List<Tour> recommendedTours = new ArrayList<>();
+
+//        try {
+//            List<Tour> allTours = (List<Tour>) tourRepository.findAll();
+//            List<HistorySearch> searchHistory = searchRepository.findByCustomerId(customerId);
+//            List<BookingTour> bookingHistory = bookingRepository.findByCustomerId(customerId);
+//
+//            DataModel dataModel = new GenericDataModel(new ArrayList<>());
+//
+//            for (Tour tour : allTours) {
+//                List<Preference> preferences = new ArrayList<>();
+//
+//                for (HistorySearch search : searchHistory) {
+//                    if (search.getSearchKeyword().contains(tour.getCountry())) {
+//                        preferences.add(new GenericPreference(customerId, tour.getTourId(), 1.0));
+//                    }
+//                }
+//
+//                for (BookingTour booking : bookingHistory) {
+//                    if (booking.getTourId().equals(tour.getTourId())) {
+//                        preferences.add(new GenericPreference(customerId, tour.getTourId(), 2.0));
+//                    }
+//                }
+//
+//                if (!preferences.isEmpty()) {
+//                    dataModel.setPreferencesFromUser(tour.getTourId(), new GenericUser(customerId), preferences);
+//                }
+//            }
+//
+//            UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
+//            UserNeighborhood neighborhood = new NearestNUserNeighborhood(10, similarity, dataModel);
+//
+//            long[] userNeighborhood = neighborhood.getUserNeighborhood(customerId);
+//            if (userNeighborhood.length > 0) {
+//                List<RecommendedItem> recommendations = new GenericUserBasedRecommender(dataModel, neighborhood, similarity)
+//                        .recommend(userNeighborhood[0], NUM_RECOMMENDATIONS);
+//
+//                for (RecommendedItem recommendation : recommendations) {
+//                    Tour recommendedTour = tourRepository.findById(recommendation.getItemID()).orElse(null);
+//                    if (recommendedTour != null) {
+//                        recommendedTours.add(recommendedTour);
+//                    }
+//                }
+//            }
+//        } catch (TasteException e) {
+//            e.printStackTrace();
+//        }
+
+        return recommendedTours;
     }
 
     public void saveFile(Long id, MultipartFile image) throws IOException {
