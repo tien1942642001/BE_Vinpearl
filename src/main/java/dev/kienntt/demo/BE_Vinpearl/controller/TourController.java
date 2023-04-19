@@ -84,9 +84,14 @@ public class TourController {
         return new ResponseMessage(200, "Success", tourService.findAll(), null);
     }
 
+//    @GetMapping("/detail/{tourId}")
+//    public ResponseMessage getHotelByTourId(@PathVariable Long tourId) {
+//        return new ResponseMessage(200, "Success", tourHotelService.findTourHotelByTourId(tourId), null);
+//    }
+
     @GetMapping("/detail/{tourId}")
     public ResponseMessage getHotelByTourId(@PathVariable Long tourId) {
-        return new ResponseMessage(200, "Success", tourHotelService.findTourHotelByTourId(tourId), null);
+        return new ResponseMessage(200, "Success", tourHotelService.findAvailableHotelsByTourIdLong(tourId), null);
     }
 //    @GetMapping("/detail/{tourId}")
 //    public ResponseEntity<List<Hotel>> getHotelByTourId(@PathVariable Long tourId) {

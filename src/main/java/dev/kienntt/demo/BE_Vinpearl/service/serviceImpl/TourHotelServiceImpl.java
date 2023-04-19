@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.service.serviceImpl;
 
+import dev.kienntt.demo.BE_Vinpearl.model.Hotel;
 import dev.kienntt.demo.BE_Vinpearl.model.Tour;
 import dev.kienntt.demo.BE_Vinpearl.model.TourHotel;
 import dev.kienntt.demo.BE_Vinpearl.repository.TourHotelRepository;
@@ -20,5 +21,9 @@ public class TourHotelServiceImpl implements TourHotelService {
 
     public List<TourHotel> findTourHotelByHotelId(Long hotelId) {
         return tourHotelRepository.findByHotelId(hotelId);
+    }
+
+    public List<TourHotel> findAvailableHotelsByTourIdLong(Long tourId) {
+        return tourHotelRepository.findAvailableHotelsByTourIdLong(tourId);
     }
 }

@@ -19,4 +19,6 @@ public interface TourService {
     void deleteTour(Long id);
 
     Page<Tour> searchTourPage(Long siteId, String searchName, Long status, List<Long> lengthStayIds, List<Long> suitableIds, List<Long> typeOfTours, Pageable pageable);
+
+    List<Tour> getRecommendedTours(Long customerId);
 }
