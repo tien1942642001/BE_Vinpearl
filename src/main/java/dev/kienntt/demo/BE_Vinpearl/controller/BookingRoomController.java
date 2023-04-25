@@ -62,8 +62,8 @@ public class BookingRoomController {
     }
 
     @PutMapping("/check-payment-room-ok/{code}")
-    public ResponseMessage checkPaymentRoomOk(@PathVariable("code") String code, @RequestBody BookingRoom bookingRoom) {
-        bookingRoomService.checkPaymentOk(code, bookingRoom);
+    public ResponseMessage checkPaymentRoomOk(@PathVariable("code") String code, @RequestBody Long id) {
+        bookingRoomService.checkPaymentOk(code, id);
         return new ResponseMessage(200, "OK", "", null);
     }
 

@@ -42,7 +42,7 @@ public interface BookingRoomService {
 
     BookingRoom saveBookingRoom(BookingRoomRequest bookingRoomRequest) throws UnsupportedEncodingException;
 
-    BookingRoom checkPaymentOk(String code, BookingRoom bookingRoomDetails);
+    BookingRoom checkPaymentOk(String code, Long id);
 
     public byte[] exportToExcel(List<BookingRoom> bookingRooms, LocalDate startDate, LocalDate endDate, HttpServletResponse response) throws IOException;
 
