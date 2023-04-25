@@ -26,9 +26,6 @@ public class DashboardController {
     private BookingTourService bookingTourService;
 
     @Autowired
-    private BookingTicketService bookingTicketService;
-
-    @Autowired
     private DashboardService dashboardService;
 
     @Autowired
@@ -42,11 +39,6 @@ public class DashboardController {
     @GetMapping("/booking-room")
     public ResponseMessage findBookingRoom(@RequestParam Long startMonth,@RequestParam Long endMonth) {
         return new ResponseMessage(200, "Success", bookingRoomService.findAllByMonth(startMonth, endMonth), null);
-    }
-
-    @GetMapping("/booking-ticket")
-    public ResponseMessage findBookingTicket(@RequestParam Long startMonth,@RequestParam Long endMonth) {
-        return new ResponseMessage(200, "Success", bookingTicketService.findAllByMonth(startMonth, endMonth), null);
     }
 
 //    thống kê số người đặt tour theo tháng
