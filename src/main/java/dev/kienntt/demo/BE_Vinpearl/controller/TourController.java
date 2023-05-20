@@ -1,23 +1,18 @@
 package dev.kienntt.demo.BE_Vinpearl.controller;
 
 import dev.kienntt.demo.BE_Vinpearl.base.ResponseMessage;
-import dev.kienntt.demo.BE_Vinpearl.model.Hotel;
 import dev.kienntt.demo.BE_Vinpearl.model.Tour;
-import dev.kienntt.demo.BE_Vinpearl.model.TourHotel;
 import dev.kienntt.demo.BE_Vinpearl.service.TourHotelService;
 import dev.kienntt.demo.BE_Vinpearl.service.TourService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @CrossOrigin("*")
@@ -140,8 +135,17 @@ public class TourController {
                                       @RequestParam(required = false) List<Long> lengthStayIds,
                                       @RequestParam(required = false) List<Long> suitableIds,
                                       @RequestParam(required = false) List<Long> typeOfTours,
+                                      @RequestParam(required = false) Long customerId,
                                             Pageable pageable) {
-        Page<Tour> listTour = tourService.searchTourPage(siteId, searchName, status, lengthStayIds, suitableIds, typeOfTours, pageable);
+        Page<Tour> listTour = tourService.searchTourPage(customerId, siteId, searchName, status, lengthStayIds, suitableIds, typeOfTours, pageable);
         return new ResponseMessage(200, "Success", listTour, null);
+    }
+
+    @GetMapping("/recommendation/{customerId}")
+    public ResponseMessage getRecommendedTours(@PathVariable Long customerId) {
+        // Lấy danh sách tour được đề xuất dựa trên các tương tác của người dùng
+        List<Tour> recommendedTours = tourService.getRecommendedTours(customerId);
+
+        return new ResponseMessage(200, "Success", recommendedTours, null);
     }
 }

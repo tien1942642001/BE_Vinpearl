@@ -1,6 +1,7 @@
 package dev.kienntt.demo.BE_Vinpearl.service;
 
 import dev.kienntt.demo.BE_Vinpearl.model.Hotel;
+import dev.kienntt.demo.BE_Vinpearl.model.Tour;
 import dev.kienntt.demo.BE_Vinpearl.model.TourHotel;
 import dev.kienntt.demo.BE_Vinpearl.repository.TourHotelRepository;
 

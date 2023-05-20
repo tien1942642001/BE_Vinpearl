@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.service.serviceImpl;
 
+import dev.kienntt.demo.BE_Vinpearl.domain.dto.CustomerStats;
 import dev.kienntt.demo.BE_Vinpearl.domain.dto.CustomerTop5Dto;
 import dev.kienntt.demo.BE_Vinpearl.model.Customer;
 import dev.kienntt.demo.BE_Vinpearl.model.User;
@@ -53,4 +54,10 @@ public class CustomerServiceImpl implements CustomerService {
     public Page<Customer> search(String email, String name , String phone, Pageable pageable) {
         return customerRepository.search(email, name, phone, pageable);
     }
+
+
+//    @Override
+//    public CustomerStats countCustomersByType(Long startTime, Long endTime) {
+//        return customerRepository.countCustomersByType(startTime, endTime);
+//    }
 }

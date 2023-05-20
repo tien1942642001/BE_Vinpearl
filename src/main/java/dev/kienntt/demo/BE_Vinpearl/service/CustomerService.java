@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.service;
 
+import dev.kienntt.demo.BE_Vinpearl.domain.dto.CustomerStats;
 import dev.kienntt.demo.BE_Vinpearl.domain.dto.CustomerTop5Dto;
 import dev.kienntt.demo.BE_Vinpearl.model.Customer;
 import dev.kienntt.demo.BE_Vinpearl.model.User;
@@ -23,4 +24,7 @@ public interface CustomerService {
     List<CustomerTop5Dto> getTop5();
 
     Page<Customer> search(String email, String name, String phone, Pageable pageable);
+
+
+//    CustomerStats countCustomersByType(Long startTime, Long endTime);
 }

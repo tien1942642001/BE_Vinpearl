@@ -16,4 +16,6 @@ public interface CommentService {
     void remove(Long id);
 
     Page<Comment> search(Long postId, Pageable pageable);
+
+    Long countCommentByPostId(Long postId);
 }

@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface HistorySearchRepository extends JpaRepository<HistorySearch, Long> {
-    List<HistorySearch> findByCustomerId(Long customerId);
+    List<HistorySearch> findAllByCustomerId(Long customerId);
 }

@@ -1,10 +1,9 @@
 package dev.kienntt.demo.BE_Vinpearl.controller;
 
 import dev.kienntt.demo.BE_Vinpearl.base.ResponseMessage;
-import dev.kienntt.demo.BE_Vinpearl.model.Hotel;
-import dev.kienntt.demo.BE_Vinpearl.model.Post;
-import dev.kienntt.demo.BE_Vinpearl.model.Restaurant;
-import dev.kienntt.demo.BE_Vinpearl.model.Tour;
+import dev.kienntt.demo.BE_Vinpearl.model.*;
+import dev.kienntt.demo.BE_Vinpearl.repository.LikeRepository;
+import dev.kienntt.demo.BE_Vinpearl.service.LikeService;
 import dev.kienntt.demo.BE_Vinpearl.service.PostService;
 import dev.kienntt.demo.BE_Vinpearl.service.RestaurantService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +24,9 @@ public class PostController {
     private PostService postService;
 
     LocalDateTime localDateTime = LocalDateTime.now();
+
+    @Autowired
+    private LikeService likeService;
 
     @PostMapping("/create")
     public ResponseMessage create(@RequestBody Post post) {
@@ -58,8 +60,8 @@ public class PostController {
     @PostMapping("/add")
     public ResponseMessage addPost(@RequestParam String name,
                                        @RequestParam String content,
-                                       @RequestParam Long siteId,
-                                       @RequestParam (required = false) Long hotelId,
+                                       @RequestParam (required = false) Long siteId,
+                                       @RequestParam Long hotelId,
                                         @RequestParam Long customerId,
                                        @RequestParam MultipartFile images) throws IOException {
         Post post = new Post();
@@ -73,5 +75,16 @@ public class PostController {
         post.setCustomerId(customerId);
         postService.add(post, images);
         return new ResponseMessage(200, "Success", "", null);
+    }
+
+    @PostMapping("like/save")
+    public ResponseMessage saveLike(@RequestBody Like like) {
+        return new ResponseMessage(200, "Success", likeService.save(like), null);
+    }
+
+    @PostMapping("like/detail")
+    public ResponseMessage findByPostIdAndCustomerId(@RequestBody Like like) {
+        Like like1 = likeService.findByPostIdAndCustomerId(like.getPostId(), like.getCustomerId());
+        return new ResponseMessage(200, "Success", like1, null);
     }
 }

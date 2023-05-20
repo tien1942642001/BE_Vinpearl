@@ -19,4 +19,9 @@ public class HotelDto {
     private Long priceMin;
 
     private String path;
+
+    public HotelDto(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }

@@ -46,16 +46,16 @@ public interface RoomRepository extends PagingAndSortingRepository<Room, Long> {
     List<Room> findByRoomGroupType(Long roomTypeId, Long status);
 
     @Query("SELECT r FROM Room r WHERE " +
-            "r.roomTypeId = :roomTypeId and r.roomGroupType = 0 AND r.id NOT IN " +
-            "(select b.roomId from BookingRoom b where (b.checkIn between :startDate and :endDate) OR (b.checkOut BETWEEN :startDate AND :endDate))")
-//            "(SELECT b.room.id FROM Booking b WHERE (b.checkInDate BETWEEN :startDate AND :endDate) OR (b.checkOutDate BETWEEN :startDate AND :endDate))")
+            "r.roomTypeId = :roomTypeId AND r.id NOT IN " +
+            "(select b.roomId from BookingRoom b where b.checkIn between :startDate and :endDate OR (b.checkOut BETWEEN :startDate AND :endDate)) AND r.id NOT IN " +
+            "(select bt.roomId from BookingTour bt where bt.tour.startDate between :startDate and :endDate OR (bt.tour.endDate BETWEEN :startDate AND :endDate))")
     List<Room> findRoomEmpty(Long roomTypeId, LocalDateTime startDate, LocalDateTime endDate);
 
     @Query("SELECT r FROM Room r WHERE " +
-            "r.status = :status AND r.roomTypeId = :roomTypeId and r.roomGroupType = 1 AND r.id NOT IN " +
-            "(select b.roomId from BookingRoom b where b.checkIn between :startDate and :endDate OR (b.checkOut BETWEEN :startDate AND :endDate))")
-//            "(SELECT b.room.id FROM Booking b WHERE (b.checkInDate BETWEEN :startDate AND :endDate) OR (b.checkOutDate BETWEEN :startDate AND :endDate))")
-    List<Room> findRoomTourEmpty(Long roomTypeId, Long status, LocalDateTime startDate, LocalDateTime endDate);
+            "r.roomTypeId = :roomTypeId AND r.id NOT IN " +
+            "(select b.roomId from BookingRoom b where b.checkIn between :startDate and :endDate OR (b.checkOut BETWEEN :startDate AND :endDate)) AND r.id NOT IN " +
+            "(select bt.roomId from BookingTour bt where bt.tour.startDate between :startDate and :endDate OR (bt.tour.endDate BETWEEN :startDate AND :endDate))")
+    List<Room> findRoomTourEmpty(Long roomTypeId, LocalDateTime startDate, LocalDateTime endDate);
 
     @Query("SELECT COUNT(r) FROM Room r WHERE r.roomTypeId = :roomTypeId")
     int countRooms(Long roomTypeId);

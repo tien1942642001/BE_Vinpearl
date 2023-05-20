@@ -1,6 +1,7 @@
 package dev.kienntt.demo.BE_Vinpearl.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -34,11 +35,8 @@ public class EmailService {
         helper.setTo(to);
 
         String content = "<b>Dear guru</b>,<br><i>Please look at this nice picture:.</i>"
-                + "<br><img src='cid:image001'/><br><b>Best Regards</b>";
+                + "<br><img src='https://localhost:8443/images/email.jpg'/><br><b>Best Regards</b>";
         helper.setText(content, true);
-
-        FileSystemResource resource = new FileSystemResource(new File("picture.png"));
-        helper.addInline("image001", resource);
 
         emailSender.send(message);
     }

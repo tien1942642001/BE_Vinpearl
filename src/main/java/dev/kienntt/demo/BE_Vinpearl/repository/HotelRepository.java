@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.repository;
 
+import dev.kienntt.demo.BE_Vinpearl.domain.dto.HotelDto;
 import dev.kienntt.demo.BE_Vinpearl.model.Hotel;
 import dev.kienntt.demo.BE_Vinpearl.model.RoomType;
 import org.springframework.data.domain.Page;
@@ -33,4 +34,7 @@ public interface HotelRepository extends PagingAndSortingRepository<Hotel, Long>
     Page<Hotel> searchHotel(Long siteId, String name, Long totalRoom, String phone, Pageable pageable);
 
     List<Hotel> findBySiteId(Long siteId);
+
+    @Query("select distinct new dev.kienntt.demo.BE_Vinpearl.domain.dto.HotelDto(h.id, h.name) from Hotel h left join BookingRoom br on h.id = br.hotelId WHERE br.customerId = :customerId and br.paymentStatus = 1 and h.siteId = :siteId")
+    List<HotelDto> getListHotelByCustomer(Long customerId, Long siteId);
 }

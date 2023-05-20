@@ -9,16 +9,13 @@ import javax.persistence.*;
 import java.util.Set;
 
 @Entity
-@Table(name = "comment")
+@Table(name = "likes")
 @Getter
 @Setter
-public class Comment {
+public class Like {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(name = "content")
-    private String content;
 
     @Column(name = "post_id")
     private Long postId;
@@ -34,4 +31,6 @@ public class Comment {
     @ManyToOne
     @JoinColumn(name="customer_id", nullable=false, insertable = false, updatable = false)
     private Customer customer;
+
+    private long status;
 }

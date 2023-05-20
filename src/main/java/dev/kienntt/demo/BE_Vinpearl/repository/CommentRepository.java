@@ -13,4 +13,6 @@ public interface CommentRepository extends PagingAndSortingRepository<Comment, L
     @Query("select c from Comment c WHERE " +
             "(:postId is null or c.postId = :postId)")
     Page<Comment> search(Long postId , Pageable pageable);
+
+    Long countCommentByPostId(Long postId);
 }

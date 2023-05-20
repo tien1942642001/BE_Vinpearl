@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.repository;
 
+import dev.kienntt.demo.BE_Vinpearl.domain.dto.CustomerStats;
 import dev.kienntt.demo.BE_Vinpearl.domain.dto.CustomerTop5Dto;
 import dev.kienntt.demo.BE_Vinpearl.model.Customer;
 import dev.kienntt.demo.BE_Vinpearl.model.Hotel;
@@ -15,6 +16,17 @@ import java.util.List;
 @Repository
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
     Customer findByEmail(String email);
+
+//    @Query("SELECT new dev.kienntt.demo.BE_Vinpearl.domain.dto.CustomerStats(" +
+//            "COUNT(DISTINCT c.id), " +
+//            "COUNT(DISTINCT CASE WHEN c.isNewCustomer = true THEN c.id ELSE null END), " +
+//            "COUNT(DISTINCT CASE WHEN c.isNewCustomer = false THEN c.id ELSE null END)) " +
+//            "FROM Customer c " +
+//            "LEFT JOIN c.bookingTours bt " +
+//            "LEFT JOIN c.bookingRooms br " +
+//            "WHERE (bt.paymentDate BETWEEN :startTime AND :endTime) OR (br.paymentDate BETWEEN :startTime AND :endTime)")
+//    Customer countCustomersByType(Long startTime,Long endTime);
+
 
     @Query("select new dev.kienntt.demo.BE_Vinpearl.domain.dto.CustomerTop5Dto(c.fullName, c.sex, c.email, c.phone, SUM(bt.paymentAmount)) from Customer c " +
             "left join BookingTour bt on bt.customerId = c.id WHERE " +

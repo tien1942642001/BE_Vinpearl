@@ -20,12 +20,13 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class TourServiceImpl implements TourService {
 
     private static final Path CURRENT_FOLDER = Paths.get(System.getProperty("user.dir"));
-    private static final String domain = "http://192.168.1.6:8080/";
+    private static final String domain = "https://localhost:8443/";
     @Autowired
     private TourRepository tourRepository;
 
@@ -44,7 +45,13 @@ public class TourServiceImpl implements TourService {
     private ServiceRepository serviceRepository;
 
     @Autowired
-    private HistorySearchRepository searchRepository;
+    private HistorySearchRepository historySearchRepository;
+
+    @Autowired
+    private PostRepository postRepository;
+
+    @Autowired
+    private LikeRepository likeRepository;
 
     @Autowired
     private BookingTourRepository bookingRepository;
@@ -119,62 +126,116 @@ public class TourServiceImpl implements TourService {
     }
 
     @Override
-    public Page<Tour> searchTourPage(Long siteId, String searchName, Long status, List<Long> lengthStayIds, List<Long> suitableIds, List<Long> typeOfTours, Pageable pageable) {
+    public Page<Tour> searchTourPage(Long customerId, Long siteId, String searchName, Long status, List<Long> lengthStayIds, List<Long> suitableIds, List<Long> typeOfTours, Pageable pageable) {
 //        PageRequest page_req = new PageRequest(0, buildingId, Sort.Direction.DESC, "idNode");
+        if (searchName != null && customerId != null) {
+            HistorySearch historySearch = new HistorySearch();
+            historySearch.setCustomerId(customerId);
+            historySearch.setSearchKeyword(searchName);
+            historySearchRepository.save(historySearch);
+        }
         return tourRepository.searchTourPage(siteId, searchName, status, lengthStayIds, suitableIds, typeOfTours, pageable);
     }
 
     @Override
     public List<Tour> getRecommendedTours(Long customerId) {
-        List<Tour> recommendedTours = new ArrayList<>();
+        List<Tour> recommendations = new ArrayList<>();
 
-//        try {
-//            List<Tour> allTours = (List<Tour>) tourRepository.findAll();
-//            List<HistorySearch> searchHistory = searchRepository.findByCustomerId(customerId);
-//            List<BookingTour> bookingHistory = bookingRepository.findByCustomerId(customerId);
-//
-//            DataModel dataModel = new GenericDataModel(new ArrayList<>());
-//
-//            for (Tour tour : allTours) {
-//                List<Preference> preferences = new ArrayList<>();
-//
-//                for (HistorySearch search : searchHistory) {
-//                    if (search.getSearchKeyword().contains(tour.getCountry())) {
-//                        preferences.add(new GenericPreference(customerId, tour.getTourId(), 1.0));
-//                    }
-//                }
-//
-//                for (BookingTour booking : bookingHistory) {
-//                    if (booking.getTourId().equals(tour.getTourId())) {
-//                        preferences.add(new GenericPreference(customerId, tour.getTourId(), 2.0));
-//                    }
-//                }
-//
-//                if (!preferences.isEmpty()) {
-//                    dataModel.setPreferencesFromUser(tour.getTourId(), new GenericUser(customerId), preferences);
-//                }
-//            }
-//
-//            UserSimilarity similarity = new PearsonCorrelationSimilarity(dataModel);
-//            UserNeighborhood neighborhood = new NearestNUserNeighborhood(10, similarity, dataModel);
-//
-//            long[] userNeighborhood = neighborhood.getUserNeighborhood(customerId);
-//            if (userNeighborhood.length > 0) {
-//                List<RecommendedItem> recommendations = new GenericUserBasedRecommender(dataModel, neighborhood, similarity)
-//                        .recommend(userNeighborhood[0], NUM_RECOMMENDATIONS);
-//
-//                for (RecommendedItem recommendation : recommendations) {
-//                    Tour recommendedTour = tourRepository.findById(recommendation.getItemID()).orElse(null);
-//                    if (recommendedTour != null) {
-//                        recommendedTours.add(recommendedTour);
-//                    }
-//                }
-//            }
-//        } catch (TasteException e) {
-//            e.printStackTrace();
-//        }
+        // Lấy lịch sử tìm kiếm của người dùng
+        List<HistorySearch> historySearches = historySearchRepository.findAllByCustomerId(customerId);
 
-        return recommendedTours;
+        // Lấy danh sách bài đăng của người dùng
+        List<Post> posts = postRepository.findAllByCustomerId(customerId);
+
+        // Lấy danh sách các bài đăng mà người dùng đã thích
+        List<Long> likedPostIds = likeRepository.findAllByCustomerId(customerId).stream()
+                .map(Like::getPostId)
+                .collect(Collectors.toList());
+
+        // Tính toán trọng số cho các tour
+        for (Tour tour : tourRepository.findAll()) {
+            double weight = 0.0;
+
+            // Tính toán trọng số cho thuộc tính location
+            for (HistorySearch search : historySearches) {
+                if (tour.getName().contains(search.getSearchKeyword())) {
+                    weight += 1.0;
+                }
+            }
+
+            // Tính toán trọng số cho thuộc tính description
+            for (HistorySearch search : historySearches) {
+                if (tour.getDescription().contains(search.getSearchKeyword())) {
+                    weight += 0.5;
+                }
+            }
+
+            // Tính toán trọng số cho thuộc tính title và content của bài đăng
+            for (Post post : posts) {
+                if (tour.getName().contains(post.getName())) {
+                    weight += 0.5;
+                }
+
+                if (tour.getDescription().contains(post.getContent())) {
+                    weight += 0.5;
+                }
+            }
+
+            // Tính toán trọng số cho các bài đăng đã được thích
+            for (Long postId : likedPostIds) {
+                if (tour.getLeavingToId().equals(postRepository.findById(postId).get().getSiteId())) {
+                    weight += 1.0;
+                }
+            }
+
+            // Thêm tour vào danh sách gợi ý nếu có trọng số lớn hơn 0
+            if (weight > 0.0) {
+                recommendations.add(tour);
+            }
+        }
+
+        // Sắp xếp danh sách gợi ý theo trọng số giảm dần
+        recommendations.sort((t1, t2) -> Double.compare(getWeight(t2, historySearches, posts, likedPostIds), getWeight(t1, historySearches, posts, likedPostIds)));
+
+        return recommendations;
+    }
+
+    private double getWeight(Tour tour, List<HistorySearch> historySearches, List<Post> posts, List<Long> likedPostIds) {
+        double weight = 0.0;
+
+        // Tính toán trọng số cho thuộc tính location
+        for (HistorySearch search : historySearches) {
+            if (tour.getName().contains(search.getSearchKeyword())) {
+                weight += 1.0;
+            }
+        }
+
+        // Tính toán trọng số cho thuộc tính description
+        for (HistorySearch search : historySearches) {
+            if (tour.getDescription().contains(search.getSearchKeyword())) {
+                weight += 0.5;
+            }
+        }
+
+        // Tính toán trọng số cho thuộc tính title và content của bài đăng
+        for (Post post : posts) {
+            if (tour.getName().contains(post.getName())) {
+                weight += 0.5;
+            }
+
+            if (tour.getDescription().contains(post.getContent())) {
+                weight += 0.5;
+            }
+        }
+
+        // Tính toán trọng số cho các bài đăng đã được thích
+        for (Long postId : likedPostIds) {
+            if (tour.getLeavingToId().equals(postRepository.findById(postId).get().getSiteId())) {
+                weight += 1.0;
+            }
+        }
+
+        return weight;
     }
 
     public void saveFile(Long id, MultipartFile image) throws IOException {

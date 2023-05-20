@@ -45,4 +45,8 @@ public interface BookingRoomRepository extends  PagingAndSortingRepository<Booki
             "(:status is null or b.paymentStatus = :status) and " +
             "(:startDate is null or :endDate is null or (b.paymentDate between :startDate and :endDate))")
     List<BookingRoom> searchExport(LocalDateTime startDate,LocalDateTime endDate, Long status);
+
+    @Query("SELECT count(b.id) FROM BookingRoom b where " +
+            "(:startTime is null or :endTime is null or (b.paymentDate between :startTime and :endTime))")
+    Long countBookingRoom(Long startTime,Long endTime);
 }

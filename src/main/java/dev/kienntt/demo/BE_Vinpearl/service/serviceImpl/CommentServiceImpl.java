@@ -43,4 +43,9 @@ public class CommentServiceImpl implements CommentService {
     public Page<Comment> search(Long postId, Pageable pageable) {
         return commentRepository.search(postId,  pageable);
     }
+
+    @Override
+    public Long countCommentByPostId(Long postId) {
+        return commentRepository.countCommentByPostId(postId);
+    }
 }

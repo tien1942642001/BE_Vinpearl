@@ -17,13 +17,16 @@ public class WebConfig extends WebMvcConfigurerAdapter implements WebMvcConfigur
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(jwtInterceptor);
+        registry.addInterceptor(jwtInterceptor)
+                .addPathPatterns("/api/v1/**")
+                .excludePathPatterns("/api/v1/public/**");
     }
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/*")
-                .allowedOrigins("http://localhost:4200", "http://localhost:4401")
+//                .allowedOrigins("http://localhost:4200", "http://localhost:4401")
+                .allowedOrigins("*")
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*")
                 .allowCredentials(false)

@@ -38,4 +38,8 @@ public interface BookingTourRepository extends PagingAndSortingRepository<Bookin
             "(:status is null or b.paymentStatus = :status) and " +
             "(:startDate is null or :endDate is null or b.paymentDate between :startDate and :endDate)")
     List<BookingTour> searchExport(LocalDateTime startDate,LocalDateTime endDate, Long status);
+
+    @Query("SELECT count(b.id) FROM BookingTour b where " +
+            "(:startTime is null or :endTime is null or (b.paymentDate between :startTime and :endTime))")
+    Long countBookingTour(Long startTime,Long endTime);
 }

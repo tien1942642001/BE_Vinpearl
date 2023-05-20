@@ -2,6 +2,8 @@ package dev.kienntt.demo.BE_Vinpearl.service.serviceImpl;
 
 import dev.kienntt.demo.BE_Vinpearl.model.ImageHotel;
 import dev.kienntt.demo.BE_Vinpearl.model.Post;
+import dev.kienntt.demo.BE_Vinpearl.repository.CommentRepository;
+import dev.kienntt.demo.BE_Vinpearl.repository.LikeRepository;
 import dev.kienntt.demo.BE_Vinpearl.repository.PostRepository;
 import dev.kienntt.demo.BE_Vinpearl.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,9 +22,15 @@ import java.util.Optional;
 @Service
 public class PostServiceImpl implements PostService {
     private static final Path CURRENT_FOLDER = Paths.get(System.getProperty("user.dir"));
-    private static final String domain = "http://192.168.1.6:8080/";
+    private static final String domain = "https://localhost:8443/";
     @Autowired
     private PostRepository postRepository;
+
+    @Autowired
+    private LikeRepository likeRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Override
     public Iterable findAll() {
@@ -31,7 +39,12 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public Optional findById(Long id) {
-        return postRepository.findById(id);
+        Optional<Post> post = postRepository.findById(id);
+        Long countLike = likeRepository.countByStatusAndPostId(1L, id);
+        Long countComment = commentRepository.countCommentByPostId(id);
+        post.get().setCountLike(countLike);
+        post.get().setCountComment(countComment);
+        return post;
     }
 
     @Override

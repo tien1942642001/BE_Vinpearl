@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.controller;
 
+import dev.kienntt.demo.BE_Vinpearl.domain.dto.HotelDto;
 import dev.kienntt.demo.BE_Vinpearl.model.Hotel;
 import dev.kienntt.demo.BE_Vinpearl.base.ResponseMessage;
 import dev.kienntt.demo.BE_Vinpearl.service.HotelService;
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -113,6 +115,12 @@ public class HotelController {
                                             @RequestParam(required = false) String phone,
                                             Pageable pageable) {
         Page<Hotel> listHotel = hotelService.searchHotel(siteId, name, totalRoom, phone, pageable);
+        return new ResponseMessage(200, "Success", listHotel, null);
+    }
+
+    @GetMapping("/getListHotelByCustomer")
+    public ResponseMessage getListHotelByCustomer(@RequestParam Long customerId, @RequestParam Long siteId) {
+        List<HotelDto> listHotel = hotelService.getListHotelByCustomer(customerId, siteId);
         return new ResponseMessage(200, "Success", listHotel, null);
     }
 }

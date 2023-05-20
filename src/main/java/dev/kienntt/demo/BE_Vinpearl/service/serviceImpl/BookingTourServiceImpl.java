@@ -193,7 +193,7 @@ public class BookingTourServiceImpl implements BookingTourService {
         Customer customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy khách hàng"));
 
-        List<Room> availableRooms = roomRepository.findRoomTourEmpty(roomTypeId, 0L, tour.get().getStartDate(), tour.get().getEndDate());
+        List<Room> availableRooms = roomRepository.findRoomTourEmpty(roomTypeId, tour.get().getStartDate(), tour.get().getEndDate());
 //        List<Room> availableRooms = roomRepository.findByRoomGroupType(roomTypeId, 0L);
         if (availableRooms.isEmpty()) {
             throw new RuntimeException("Phòng trong khách sạn đã hết, vui lòng chọn khách sạn khác");
@@ -266,7 +266,7 @@ public class BookingTourServiceImpl implements BookingTourService {
         DecimalFormat decimalFormat = new DecimalFormat("#,##0");
         String formattedPrice = decimalFormat.format(bookingTour.getPaymentAmount());
         String formattedPriceWithDot = formattedPrice.replace(",", ".");
-        // Send confirmation email
+
 //        String to = customer.getEmail();
         String to = "kienntt.iist@gmail.com";
         String subject = "Xác nhận thông tin đơn đặt tour của bạn";
@@ -276,6 +276,8 @@ public class BookingTourServiceImpl implements BookingTourService {
                 "\n" +
                 "Thông tin chi tiết về tour của bạn như sau:\n" +
                 "\n" +
+                "Tên người đặt: " + customer.getFullName() + "\n" +
+                "Số điện thoại: " + customer.getPhone() + "\n" +
                 "Tên tour: " + tour.get().getName() + "\n" +
                 "Ngày khởi hành: " + tour.get().getStartDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) + "\n" +
                 "Ngày kết thúc: " + tour.get().getEndDate().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) + "\n" +
@@ -284,9 +286,8 @@ public class BookingTourServiceImpl implements BookingTourService {
                 "\n" +
                 "Xin hãy kiểm tra kỹ thông tin trên và liên hệ với chúng tôi ngay nếu có bất kỳ sai sót nào.\n" +
                 "\n" +
-                "Để hoàn tất quá trình đặt tour, bạn vui lòng xác nhận thông tin của mình bằng cách truy cập vào đường link sau: " + bookingTour.getTour().getName() + "\n" +
+                "Vui lòng xác nhận thông tin của mình nếu sai có thể phản hồi cho tôi" + "\n" +
                 "\n" +
-                "Xin lưu ý rằng đường link xác nhận chỉ có giá trị trong vòng 24 giờ kể từ khi email này được gửi. Sau thời gian này, đường link sẽ hết hạn và bạn sẽ phải đặt tour lại từ đầu.\n" +
                 "\n" +
                 "Một lần nữa, cảm ơn bạn đã đặt tour tại công ty chúng tôi. Nếu bạn có bất kỳ câu hỏi hoặc yêu cầu nào khác, xin vui lòng liên hệ với chúng tôi.\n" +
                 "\n" +

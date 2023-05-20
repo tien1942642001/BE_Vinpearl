@@ -25,16 +25,16 @@ public class DashboardServiceImpl implements DashboardService {
     @Autowired
     private TourRepository tourRepository;
 
-    public List<Map<String, Object>> getTotal() {
+    public List<Map<String, Object>> getTotal(Long startTime, Long endTime) {
         List<Map<String, Object>> result = new ArrayList<>();
 
-        Long totalBookingTour = bookingTourRepository.count();
+        Long totalBookingTour = bookingTourRepository.countBookingTour(startTime, endTime);
         Map<String, Object> bookingTourMap = new HashMap<>();
         bookingTourMap.put("name", "booking_tour");
         bookingTourMap.put("total", totalBookingTour);
         result.add(bookingTourMap);
 
-        Long totalBookingRoom = bookingRoomRepository.count();
+        Long totalBookingRoom = bookingRoomRepository.countBookingRoom(startTime, endTime);
         Map<String, Object> bookingRoomMap = new HashMap<>();
         bookingRoomMap.put("name", "booking_room");
         bookingRoomMap.put("total", totalBookingRoom);

@@ -3,7 +3,10 @@ package dev.kienntt.demo.BE_Vinpearl.controller;
 import dev.kienntt.demo.BE_Vinpearl.base.ResponseMessage;
 import dev.kienntt.demo.BE_Vinpearl.model.BookingRoom;
 import dev.kienntt.demo.BE_Vinpearl.model.Comment;
+import dev.kienntt.demo.BE_Vinpearl.model.Like;
+import dev.kienntt.demo.BE_Vinpearl.repository.LikeRepository;
 import dev.kienntt.demo.BE_Vinpearl.service.CommentService;
+import dev.kienntt.demo.BE_Vinpearl.service.LikeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -68,4 +71,5 @@ public class CommentController {
         Page<Comment> list = commentService.search(postId, pageable);
         return new ResponseMessage(200, "Success", list, null);
     }
+
 }

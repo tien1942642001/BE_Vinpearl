@@ -118,11 +118,10 @@ public class BookingTourController {
     @PostMapping("/export")
     public void exportToExcel(@RequestBody SearchExportRequest searchExportRequest, HttpServletResponse response) throws IOException {
         List<BookingTour> bookingTours = bookingTourService.searchExport(searchExportRequest);
-//        bookingRoomService.exportToExcel(bookingRooms, response);
         byte[] excelBytes = bookingTourService.exportToExcel(bookingTours, searchExportRequest.getStartDate(), searchExportRequest.getEndDate(), response);
         // Đặt header "Content-Disposition" để tệp trả về được đặt tên và thông báo là một tệp Excel
         response.setContentType("application/vnd.ms-excel");
-        response.setHeader("Content-Disposition", "attachment; filename=booking-rooms.xls");
+        response.setHeader("Content-Disposition", "attachment; filename=booking-tours.xls");
 
         // Ghi dữ liệu tệp Excel vào response
         OutputStream outputStream = response.getOutputStream();

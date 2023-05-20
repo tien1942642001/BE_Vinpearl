@@ -7,6 +7,7 @@ import dev.kienntt.demo.BE_Vinpearl.service.SiteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -32,5 +33,10 @@ public class SiteServiceImpl implements SiteService {
     @Override
     public void remove(Long id) {
         siteRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Site> getListSiteByCustomer(Long customerId) {
+        return siteRepository.getListSiteCustomer(customerId);
     }
 }

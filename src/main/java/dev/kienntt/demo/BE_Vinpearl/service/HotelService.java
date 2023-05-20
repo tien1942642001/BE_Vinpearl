@@ -1,5 +1,6 @@
 package dev.kienntt.demo.BE_Vinpearl.service;
 
+import dev.kienntt.demo.BE_Vinpearl.domain.dto.HotelDto;
 import dev.kienntt.demo.BE_Vinpearl.model.Hotel;
 import dev.kienntt.demo.BE_Vinpearl.model.ImageHotel;
 import org.springframework.data.domain.Page;
@@ -22,4 +23,6 @@ public interface HotelService {
     Page<Hotel> searchHotel(Long siteId, String name, Long totalRoom, String phone, Pageable pageable);
 
     Page<Hotel> getListHotel(Long siteId, String name, Long totalRoom, String phone, Pageable pageable);
+
+    List<HotelDto> getListHotelByCustomer(Long customerId, Long siteId);
 }

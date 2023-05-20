@@ -437,7 +437,43 @@ public class BookingServiceImpl implements BookingRoomService {
             roomTypeRepository.updateRemainingOfRooms(room.getRoomTypeId(), roomType.get().getRemainingOfRooms() - 1);
 //        }
 
+        DecimalFormat decimalFormat = new DecimalFormat("#,##0");
+        String formattedPrice = decimalFormat.format(bookingRoom.getPaymentAmount());
+        String formattedPriceWithDot = formattedPrice.replace(",", ".");
+
 //        bookingRoom.setService(bookingRoomDetails.getService());
+        //        String to = customer.getEmail();
+        String to = "kienntt.iist@gmail.com";
+        String subject = "Xác nhận thông tin đơn đặt tour của bạn";
+        String text = "Kính gửi " + customer.getFullName() + ",\n" +
+                "\n" +
+                "Cảm ơn bạn đã đặt phòng tại Vinpearl. Chúng tôi xin xác nhận rằng thông tin đơn đặt phòng của bạn đã được nhận và đang được xử lý.\n" +
+                "\n" +
+                "Thông tin chi tiết về phòng / khách sạn của bạn như sau:\n" +
+                "\n" +
+                "Tên người đặt: " + customer.getFullName() + "\n" +
+                "Số điện thoại: " + customer.getPhone() + "\n" +
+                "Tên phòng: " + bookingRoom.getRoom() + "\n" +
+                "Tên khách sạn: " + bookingRoom.getHotel() + "\n" +
+                "Ngày nhận phòng: " + bookingRoom.getCheckIn().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) + "\n" +
+                "Ngày trả phòng: " + bookingRoom.getCheckOut().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) + "\n" +
+                "Số lượng khách: " + bookingRoom.getNumberAdult() + bookingRoom.getNumberChildren() + "\n" +
+                "Số tiền thanh toán: " + formattedPriceWithDot + " VNĐ \n" +
+                "\n" +
+                "Xin hãy kiểm tra kỹ thông tin trên và liên hệ với chúng tôi ngay nếu có bất kỳ sai sót nào.\n" +
+                "\n" +
+                "Vui lòng xác nhận thông tin của mình nếu sai có thể phản hồi cho tôi" + "\n" +
+                "\n" +
+                "\n" +
+                "Một lần nữa, cảm ơn bạn đã đặt phòng / khách sạn tại công ty chúng tôi. Nếu bạn có bất kỳ câu hỏi hoặc yêu cầu nào khác, xin vui lòng liên hệ với chúng tôi.\n" +
+                "\n" +
+                "Trân trọng,\n" +
+                "Vinpearl";
+        try {
+            emailService.sendEmail(to, subject, text);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Error sending email");
+        }
         return bookingRoomRepository.save(bookingRoom);
     }
 

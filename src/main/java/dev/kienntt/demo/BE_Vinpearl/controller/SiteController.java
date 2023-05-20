@@ -1,12 +1,14 @@
 package dev.kienntt.demo.BE_Vinpearl.controller;
 
 import dev.kienntt.demo.BE_Vinpearl.base.ResponseMessage;
+import dev.kienntt.demo.BE_Vinpearl.domain.dto.HotelDto;
 import dev.kienntt.demo.BE_Vinpearl.model.Site;
 import dev.kienntt.demo.BE_Vinpearl.service.SiteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -59,5 +61,11 @@ public class SiteController {
             return new ResponseMessage(200, "Success", null, null);
         })
                 .orElseGet(() -> new ResponseMessage(404, "Error", null, "No result with query"));
+    }
+
+    @GetMapping("/getListSiteByCustomer")
+    public ResponseMessage getListSiteByCustomer(@RequestParam Long customerId) {
+        List<Site> list = siteService.getListSiteByCustomer(customerId);
+        return new ResponseMessage(200, "Success", list, null);
     }
 }

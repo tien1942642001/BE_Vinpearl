@@ -2,6 +2,8 @@ package dev.kienntt.demo.BE_Vinpearl.service.serviceImpl;
 
 import dev.kienntt.demo.BE_Vinpearl.domain.dto.HotelDto;
 import dev.kienntt.demo.BE_Vinpearl.domain.dto.ImageHotelDto;
+import dev.kienntt.demo.BE_Vinpearl.domain.request.BookingTourStatistic;
+import dev.kienntt.demo.BE_Vinpearl.model.BookingTour;
 import dev.kienntt.demo.BE_Vinpearl.model.Hotel;
 import dev.kienntt.demo.BE_Vinpearl.model.ImageHotel;
 import dev.kienntt.demo.BE_Vinpearl.repository.HotelRepository;
@@ -26,7 +28,7 @@ import java.util.Optional;
 @Service
 public class HotelServiceImpl implements HotelService {
     private static final Path CURRENT_FOLDER = Paths.get(System.getProperty("user.dir"));
-    private static final String domain = "http://192.168.1.6:8080/";
+    private static final String domain = "https://localhost:8443/";
     @Autowired
     private HotelRepository hotelRepository;
 
@@ -83,20 +85,10 @@ public class HotelServiceImpl implements HotelService {
         return hotelRepository.getListHotel(siteId, name, totalRoom, phone, pageable);
     }
 
-//    public Long getLowestServicePriceByRoomTypeId(Long roomTypeId) {
-//        List<RoomTypeService> roomTypeServices = roomTypeServiceRepository.findByRoomTypeId(roomTypeId);
-//        if (roomTypeServices.isEmpty()) {
-//            // xử lý ngoại lệ nếu không tìm thấy dịch vụ
-//        }
-//        Long lowestPrice = null;
-//        for (RoomTypeService roomTypeService : roomTypeServices) {
-//            BigDecimal price = roomTypeService.getService().getPrice();
-//            if (lowestPrice == null || price.compareTo(lowestPrice) < 0) {
-//                lowestPrice = price;
-//            }
-//        }
-//        return lowestPrice;
-//    }
+    @Override
+    public List<HotelDto> getListHotelByCustomer(Long customerId, Long siteId) {
+        return hotelRepository.getListHotelByCustomer(customerId, siteId);
+    }
 
 
     public void saveFile(Long id, MultipartFile image) throws IOException {

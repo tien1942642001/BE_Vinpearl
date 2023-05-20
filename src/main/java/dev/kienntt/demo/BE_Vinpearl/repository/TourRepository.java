@@ -28,6 +28,13 @@ public interface TourRepository extends PagingAndSortingRepository<Tour, Long> {
             "GROUP BY t.id, t.name")
     Page<Tour> searchTourPage(Long siteId, String searchName, Long status, List<Long> lengthStayIds, List<Long> suitableIds, List<Long> typeOfTourIds, Pageable pageable);
 
+    @Query("select new dev.kienntt.demo.BE_Vinpearl.domain.dto.TourDto(t.id, t.code, t.name, t.leavingTo.name, min(th.priceAdult), t.lengthStayId, it.path, t.numberOfPeople, t.remainingOfPeople, t.typeOfTourId, t.expirationDate, t.leavingFrom.name, t.suitableId) from Tour t " +
+            "left join TourHotel th on t.id = th.tourId " +
+            "left join ImageTour it on t.id = it.tourId " +
+            "GROUP BY t.id, t.name")
+    List<Tour> getAllTour();
+
+
     @Modifying
     @Query("UPDATE Tour t SET t.remainingOfPeople = :remainingOfPeople WHERE t.id = :id")
     void updateRemainingOfTour(Long id, Long remainingOfPeople);
