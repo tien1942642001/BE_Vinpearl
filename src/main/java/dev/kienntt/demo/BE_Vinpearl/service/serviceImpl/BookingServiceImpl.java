@@ -351,12 +351,12 @@ public class BookingServiceImpl implements BookingRoomService {
     @Override
     public BookingRoom saveBookingRoom(BookingRoomRequest bookingRoomRequest) throws UnsupportedEncodingException {
         Long roomTypeId = bookingRoomRequest.getRoomTypeId();
-        RoomType roomType = roomTypeRepository.findById(roomTypeId)
-                .orElseThrow(() -> new RuntimeException("Room Type ID cannot be null."));
-
+//        RoomType roomType = roomTypeRepository.findById(roomTypeId)
+//                .orElseThrow(() -> new RuntimeException("Room Type ID cannot be null."));
+//
         Long customerId = bookingRoomRequest.getCustomerId();
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new RuntimeException("Customer ID cannot be null."));
+//        Customer customer = customerRepository.findById(customerId)
+//                .orElseThrow(() -> new RuntimeException("Customer ID cannot be null."));
 
         // Kiểm tra số phòng còn lại trong loại phòng
 //        if (roomType.getRemainingOfRooms() <= 0) {
