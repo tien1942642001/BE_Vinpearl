@@ -9,5 +9,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class BookingTourStatistic {
     private String month;
-    private long data;
+    private long dataTour;
+
+    private long dataRoom;
 }

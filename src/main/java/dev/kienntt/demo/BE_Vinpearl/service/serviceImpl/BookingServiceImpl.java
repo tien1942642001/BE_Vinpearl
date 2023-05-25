@@ -444,7 +444,7 @@ public class BookingServiceImpl implements BookingRoomService {
 //        bookingRoom.setService(bookingRoomDetails.getService());
         //        String to = customer.getEmail();
         String to = "kienntt.iist@gmail.com";
-        String subject = "Xác nhận thông tin đơn đặt tour của bạn";
+        String subject = "Xác nhận thông tin đơn đặt phòng của bạn";
         String text = "Kính gửi " + customer.getFullName() + ",\n" +
                 "\n" +
                 "Cảm ơn bạn đã đặt phòng tại Vinpearl. Chúng tôi xin xác nhận rằng thông tin đơn đặt phòng của bạn đã được nhận và đang được xử lý.\n" +
@@ -453,8 +453,8 @@ public class BookingServiceImpl implements BookingRoomService {
                 "\n" +
                 "Tên người đặt: " + customer.getFullName() + "\n" +
                 "Số điện thoại: " + customer.getPhone() + "\n" +
-                "Tên phòng: " + bookingRoom.getRoom() + "\n" +
-                "Tên khách sạn: " + bookingRoom.getHotel() + "\n" +
+                "Tên phòng: " + bookingRoom.getRoom().getName() + "\n" +
+                "Tên khách sạn: " + bookingRoom.getHotel().getName() + "\n" +
                 "Ngày nhận phòng: " + bookingRoom.getCheckIn().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) + "\n" +
                 "Ngày trả phòng: " + bookingRoom.getCheckOut().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")) + "\n" +
                 "Số lượng khách: " + bookingRoom.getNumberAdult() + bookingRoom.getNumberChildren() + "\n" +

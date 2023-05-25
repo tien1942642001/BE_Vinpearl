@@ -45,10 +45,16 @@ public interface RoomRepository extends PagingAndSortingRepository<Room, Long> {
             "r.status = :status AND r.roomTypeId = :roomTypeId and r.roomGroupType = 1")
     List<Room> findByRoomGroupType(Long roomTypeId, Long status);
 
+//    @Query("SELECT r FROM Room r WHERE " +
+//            "r.roomTypeId = :roomTypeId AND r.id NOT IN " +
+//            "(select b.roomId from BookingRoom b where b.paymentStatus = 1 and b.checkIn between :startDate and :endDate OR (b.checkOut BETWEEN :startDate AND :endDate)) AND r.id NOT IN " +
+//            "(select bt.roomId from BookingTour bt where bt.paymentStatus = 1 and bt.tour.startDate between :startDate and :endDate OR (bt.tour.endDate BETWEEN :startDate AND :endDate))")
+//    List<Room> findRoomEmpty(Long roomTypeId, LocalDateTime startDate, LocalDateTime endDate);
+
     @Query("SELECT r FROM Room r WHERE " +
-            "r.roomTypeId = :roomTypeId AND r.id NOT IN " +
-            "(select b.roomId from BookingRoom b where b.paymentStatus = 1 and b.checkIn between :startDate and :endDate OR (b.checkOut BETWEEN :startDate AND :endDate)) AND r.id NOT IN " +
-            "(select bt.roomId from BookingTour bt where bt.paymentStatus = 1 and bt.tour.startDate between :startDate and :endDate OR (bt.tour.endDate BETWEEN :startDate AND :endDate))")
+            "r.roomTypeId = :roomTypeId " +
+            "AND r.id NOT IN (SELECT b.roomId FROM BookingRoom b WHERE b.paymentStatus = 1 AND b.checkIn <= :endDate AND b.checkOut >= :startDate) " +
+            "AND r.id NOT IN (SELECT bt.roomId FROM BookingTour bt WHERE bt.paymentStatus = 1 AND bt.tour.startDate <= :endDate AND bt.tour.endDate >= :startDate)")
     List<Room> findRoomEmpty(Long roomTypeId, LocalDateTime startDate, LocalDateTime endDate);
 
     @Query("SELECT r FROM Room r WHERE " +

@@ -22,7 +22,7 @@ public interface RoomTypeRepository extends PagingAndSortingRepository<RoomType,
             "(:numberPerson is null or rt.numberAdult + rt.numberChildren >= :numberPerson) and " +
             "(:hotelName is null or rt.hotel.name LIKE CONCAT('%',:hotelName, '%')) and" +
             "(:acreage is null or rt.acreage = :acreage) and " +
-            "(:startDate is null or :endDate is null or (br.checkIn > :endDate or br.checkOut < :startDate)) and " +
+            "(:startDate is null or :endDate is null or not exists (select 1 from BookingRoom br2 where r.id = br2.roomId and br2.checkIn <= :endDate and br2.checkOut >= :startDate)) and " +
             "(:name is null or r.name LIKE CONCAT('%',:name, '%')) " +
             "group by rt.id")
     Page<RoomType> searchRoomTypesPage(Long numberPerson, String hotelName, Long acreage, String name, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable);

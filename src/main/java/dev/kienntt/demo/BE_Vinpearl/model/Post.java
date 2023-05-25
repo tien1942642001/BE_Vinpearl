@@ -41,9 +41,9 @@ public class Post {
     @Column(name = "site_id")
     private Long siteId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "customer_id", referencedColumnName = "id", insertable = false, updatable = false)
-    @JsonIgnore
+//    @JsonIgnore
     private Customer customer;
 
     @Transient

@@ -33,7 +33,7 @@ public class DashboardController {
     private CustomerService customerService;
 
     @GetMapping("/total")
-    public ResponseMessage getTotal(@RequestParam Long startTime,@RequestParam Long endTime) {
+    public ResponseMessage getTotal(@RequestParam(required = false) Long startTime, @RequestParam(required = false) Long endTime) {
         return new ResponseMessage(200, "Success", dashboardService.getTotal(startTime, endTime), null);
     }
 

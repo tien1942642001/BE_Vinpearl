@@ -15,17 +15,17 @@ public class JwtInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-//        if (!(request.getRequestURI().contains("login") || request.getRequestURI().contains("register") || request.getRequestURI().contains("images"))) {
-//            String auth = request.getHeader("Authorization");
-//            // Kiểm tra token ở header của request
-//            if (auth == null || auth.isEmpty() || !auth.startsWith("Bearer ")) {
-//                // Nếu không có token hoặc không đúng định dạng thì trả về lỗi
-//                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
-//                return false;
-//            }
-//            String token = auth.substring(7, auth.length());
-//            jwtTokenProvider.verify(token);
-//        }
+        if (!(request.getRequestURI().contains("images"))) {
+            String auth = request.getHeader("Authorization");
+            // Kiểm tra token ở header của request
+            if (auth == null || auth.isEmpty() || !auth.startsWith("Bearer ")) {
+                // Nếu không có token hoặc không đúng định dạng thì trả về lỗi
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                return false;
+            }
+            String token = auth.substring(7, auth.length());
+            jwtTokenProvider.verify(token);
+        }
         return true;
     }
 

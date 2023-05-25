@@ -1,6 +1,7 @@
 package dev.kienntt.demo.BE_Vinpearl.service.serviceImpl;
 
 import dev.kienntt.demo.BE_Vinpearl.domain.request.BookingTourStatistic;
+import dev.kienntt.demo.BE_Vinpearl.model.BookingRoom;
 import dev.kienntt.demo.BE_Vinpearl.model.BookingTour;
 import dev.kienntt.demo.BE_Vinpearl.repository.BookingRoomRepository;
 import dev.kienntt.demo.BE_Vinpearl.repository.BookingTourRepository;
@@ -52,15 +53,19 @@ public class DashboardServiceImpl implements DashboardService {
     @Override
     public List<BookingTourStatistic> statistics() {
         List<BookingTour> bookingTours = bookingTourRepository.findAllBookingTour();
+        List<BookingRoom> bookingRooms = bookingRoomRepository.findAllBookingRoom();
 
         List<BookingTourStatistic> result = new ArrayList<>();
         for (int i = 1; i <= 12; i++) {
             String month = String.format("Tháng %d", i);
             int finalI = i;
-            long count = bookingTours.stream()
-                    .filter(bookingTour -> bookingTour.getPaymentDate().getMonthValue() == finalI)
+            long countTour = bookingTours.stream()
+                    .filter(bookingTour -> bookingTour.getPaymentDate() != null && bookingTour.getPaymentDate().getMonthValue() == finalI)
                     .count();
-            result.add(new BookingTourStatistic(month, count));
+            long countRoom = bookingRooms.stream()
+                    .filter(bookingRoom -> bookingRoom.getPaymentDate() != null && bookingRoom.getPaymentDate().getMonthValue() == finalI)
+                    .count();
+            result.add(new BookingTourStatistic(month, countTour, countRoom));
         }
         return result;
     }

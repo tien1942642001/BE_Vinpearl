@@ -31,18 +31,11 @@ public class AuthController {
 
     LocalDateTime localDateTime = LocalDateTime.now();
 
-    private final JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
-
     @PostMapping("/register")
     public ResponseMessage create(@RequestBody User user) {
         userService.save(user);
         return new ResponseMessage(200, "Tạo tài khoản thành công", null, null);
     }
-
-//    @PostMapping("/login")
-//    public ResponseMessage login(@RequestBody User user) throws InvalidKeySpecException, NoSuchAlgorithmException {
-//        return new ResponseMessage(200, "Success", jwtTokenProvider.createJwtSignedHMAC(user), null);
-//    }
 
     @PostMapping("/login")
     public ResponseMessage login(@RequestBody User user) throws InvalidKeySpecException, NoSuchAlgorithmException {
