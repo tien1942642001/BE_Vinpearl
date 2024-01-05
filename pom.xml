@@ -8,7 +8,7 @@
 		<version>2.7.6</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>dev.kienntt.demo</groupId>
+	<groupId>dev.tienvv.demo</groupId>
 	<artifactId>BE_Vinpearl</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>BE_Vinpearl</name>
